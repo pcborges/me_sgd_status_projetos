@@ -10,8 +10,6 @@ ALLOWED_EXTENSIONS = {'xlsm', 'xlsx'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-app = Flask("Projeto")
-
 
 @app.route('/')
 def index():
@@ -43,7 +41,6 @@ def upload_file():
     path = os.getcwd() + '\\upload\\' + filename
     #"D:\\Patrick\\Ministerio Economia\\Projeto Situacao Startups\\upload\\" + filename
     projetosJson = getProjetosPriorizadosJSON(path)
-    print(type(projetosJson[0]['status']))
     html_emExecucao = getProjetosEmExecucaoHTML(path)
     html_emDiagnostico = getProjetosEmDiagnosticoHTML(path)
     dataModificacao = time.strftime(
@@ -52,4 +49,7 @@ def upload_file():
     return render_template('dashboard.html', projetos=projetosJson, execucao=html_emExecucao, diagnostico=html_emDiagnostico, dataModificacao=dataModificacao)
 
 
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=False, host='0.0.0.0')
+elif:
+    app.run(debug=True)
