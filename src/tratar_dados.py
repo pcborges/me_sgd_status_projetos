@@ -57,7 +57,7 @@ def getProjetosEmDiagnosticoHTML(path, index_mes_ano_indicador=16):
     projetosEmDiagnosticoTotal = pd.merge(
         emExecucaoDF, indicadoresDF, how='left', on='Nome do projeto')
     projetosEmDiagnosticoTotal.fillna(value={'Farol': 'CINZA'})
-    return projetosEmDiagnosticoTotal.to_html(index=False, classes=['table', 'table-striped'], justify='left')
+    return projetosEmDiagnosticoTotal.to_html(index=False, classes=['table', 'table-striped'], justify='left', table_id='emDiagnostico')
 
 
 def getProjetosPriorizadosJSON(path):

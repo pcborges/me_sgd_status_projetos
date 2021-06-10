@@ -3,7 +3,7 @@ import time
 from flask import Flask, flash, request, redirect, url_for, abort, render_template
 from werkzeug.utils import secure_filename
 from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML
-#"D:\\Patrick\\Ministerio Economia\\Projeto Situacao Startups\\upload"
+
 UPLOAD_FOLDER = os.getcwd() + 'upload'
 ALLOWED_EXTENSIONS = {'xlsm', 'xlsx'}
 
