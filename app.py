@@ -38,7 +38,7 @@ def upload_file():
         else:
             abort(400, "arquivo nao permitido")
 
-    path = os.getcwd() + '\\upload\\' + filename
+    path = os.getcwd() + '/upload/' + filename
     #"D:\\Patrick\\Ministerio Economia\\Projeto Situacao Startups\\upload\\" + filename
     projetosJson = getProjetosPriorizadosJSON(path)
     html_emExecucao = getProjetosEmExecucaoHTML(path)
