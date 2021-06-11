@@ -51,6 +51,7 @@ def getProjetosEmDiagnosticoHTML(path, index_mes_ano_indicador=16):
     df = df.loc[0:, ['Nome do projeto', 'Sigla Orgão',
                      'Status do Projeto', 'Líder do SQUAD']]
     df['Nome do projeto'] = df['Nome do projeto'].str.lower()
+    df.fillna(value={'Líder do SQUAD': 'N/D'}, inplace=True)
     emExecucaoDF = df[df['Status do Projeto'].str.contains(
         "Diagn") | df['Status do Projeto'].str.contains("Prioriza")]
     indicadoresDF = getIndicadoresProjetos(path, index_mes_ano_indicador)

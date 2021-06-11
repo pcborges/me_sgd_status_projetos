@@ -40,9 +40,13 @@ def upload_file():
 
     path = os.getcwd() + '/upload/' + filename
     #"D:\\Patrick\\Ministerio Economia\\Projeto Situacao Startups\\upload\\" + filename
-    projetosJson = getProjetosPriorizadosJSON(path)
-    html_emExecucao = getProjetosEmExecucaoHTML(path)
-    html_emDiagnostico = getProjetosEmDiagnosticoHTML(path)
+    try:
+        projetosJson = getProjetosPriorizadosJSON(path)
+        html_emExecucao = getProjetosEmExecucaoHTML(path)
+        html_emDiagnostico = getProjetosEmDiagnosticoHTML(path)
+    except:
+        abort(400, "Houve algum erro no processamento do arquivo, certifique-se de que o arquivo enviado está no padrão necessário.")
+
     dataModificacao = time.strftime(
         '%d/%m/%Y', time.localtime(os.path.getmtime(path)))
     # print(dataDF.head())
