@@ -31,26 +31,36 @@ def upload_file():
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == '':
-            abort(400, "filename em branco")
+            mensagemErro = "Arquivo é obrigatório."
+            return render_template('index.html', mensagem=mensagemErro)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join("upload", filename))
         else:
-            abort(400, "arquivo nao permitido")
+            mensagemErro = "O formato de arquivo enviado não é permitido, apenas extensões .xlsm, .xlsx"
+            return render_template('index.html', mensagem=mensagemErro)
 
     path = os.getcwd() + '/upload/' + filename
+    mesAnoReferencia = int(request.form.get('mes_ano'))
+    request.form.getlist('mes_ano')
     #"D:\\Patrick\\Ministerio Economia\\Projeto Situacao Startups\\upload\\" + filename
     try:
         projetosJson = getProjetosPriorizadosJSON(path)
-        html_emExecucao = getProjetosEmExecucaoHTML(path)
-        html_emDiagnostico = getProjetosEmDiagnosticoHTML(path)
+        html_emExecucao = getProjetosEmExecucaoHTML(path, mesAnoReferencia)
+        html_emDiagnostico = getProjetosEmDiagnosticoHTML(
+            path, mesAnoReferencia)
     except:
-        abort(400, "Houve algum erro no processamento do arquivo, certifique-se de que o arquivo enviado está no padrão necessário.")
+        mensagemErro = "Houve algum erro no processamento do arquivo, certifique-se de que o arquivo enviado está no padrão necessário."
+        return render_template('index.html', mensagem=mensagemErro)
 
-    dataModificacao = time.strftime(
-        '%d/%m/%Y', time.localtime(os.path.getmtime(path)))
-    # print(dataDF.head())
-    return render_template('dashboard.html', projetos=projetosJson, execucao=html_emExecucao, diagnostico=html_emDiagnostico, dataModificacao=dataModificacao)
+    if mesAnoReferencia == 14:
+        periodoReferencia = '03/2021'
+    elif mesAnoReferencia == 15:
+        periodoReferencia = '04/2021'
+    else:
+        periodoReferencia = '05/2021'
+
+    return render_template('dashboard.html', projetos=projetosJson, execucao=html_emExecucao, diagnostico=html_emDiagnostico, periodoReferencia=periodoReferencia)
 
 
 if __name__ == "__main__":

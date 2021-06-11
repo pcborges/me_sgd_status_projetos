@@ -19,10 +19,10 @@
   <header>
     <div class="container py-3">
       <div class="topo">
-        <div class="logo"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}"
-            alt="Startup Gov.br" title="Startup Gov.br" height="100%" /></div>
+        <div class="logo"><a href="/"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}"
+              alt="Startup Gov.br" title="Startup Gov.br" height="100%" /></a></div>
         <div class="titulo">
-          <h5>Arquivo atualizado em: {{dataModificacao}}</h5>
+          <h5>Relatório gerado para referência: <b>{{periodoReferencia}}</b></h5>
         </div>
       </div>
     </div>
@@ -143,7 +143,15 @@
             </div>
           </div>
   </main>
-
+  <footer>
+    <div class="container mb-3">
+      <div class="row justify-content-center">
+        <div class="col-3">
+          <a href="/" class="btn btn-primary btn-lg" role="button">Gerar novo Relatório</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <script src="{{ url_for('static', filename='js/dashboard.js' ) }}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
