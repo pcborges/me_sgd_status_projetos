@@ -39,6 +39,7 @@ def getProjetosEmExecucaoHTML(path, index_mes_ano_indicador=16):
     df.fillna(value={'Líder do SQUAD': 'N/D'}, inplace=True)
     df['Nome do projeto'] = df['Nome do projeto'].str.lower()
     emExecucaoDF = df[df['Status do Projeto'].str.contains("Exec")]
+    emExecucaoDF.drop('Status do Projeto', axis='columns', inplace=True)
     indicadoresDF = getIndicadoresProjetos(path, index_mes_ano_indicador)
     projetosEmExecucaoDFTotal = pd.merge(
         emExecucaoDF, indicadoresDF, how='left', on='Nome do projeto')
