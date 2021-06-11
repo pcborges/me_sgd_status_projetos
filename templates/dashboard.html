@@ -18,10 +18,13 @@
 <body>
   <header>
     <div class="container py-3">
-      <div class="topo">
-        <div class="logo"><a href="/"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}"
-              alt="Startup Gov.br" title="Startup Gov.br" height="100%" /></a></div>
-        <div class="titulo">
+      <div class="row">
+        <div class="col">
+          <div class="logo"><a href="/"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}"
+                alt="Startup Gov.br" title="Startup Gov.br" height="120px"></a></div>
+        </div>
+
+        <div class="col align-self-center text-end">
           <h5>Relatório gerado para referência: <b>{{periodoReferencia}}</b></h5>
         </div>
       </div>
@@ -42,12 +45,12 @@
           <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
             aria-labelledby="panelsStayOpen-situacaoProjetos">
             <div class="accordion-body">
-              <div class="container mb-4 d-sm-none d-md-block">
+              <div class="container mb-4 ">
                 <div class="row align-items-center">
                   <div class="col">
                     <h4>Projetos Priorizados: {{totais.total}}</h4>
                   </div>
-                  <div class="col text-end">
+                  <div class="col col-md-8 text-end d-none d-md-block">
                     <button type="button" class="btn btn-success">{{totais.execucao}} Execução</button>
                     <button type="button" class="btn btn-primary">{{totais.diagnostico}} Diagnóstico</button>
                     <button type="button" class="btn btn-dark">{{totais.pactuacao}} Pactuação</button>
@@ -93,7 +96,7 @@
                 aria-labelledby="panelsStayOpen-emExecucao">
                 <div class="accordion-body">
                   <div class="container mb-4">
-                    <div class="row align-items-center d-sm-none d-md-block">
+                    <div class="row align-items-center d-none d-md-block">
                       <div class="col text-end">
                         <button type="button" class="btn btn-success">Na Meta</button>
                         <button type="button" class="btn btn-warning">Em Atenção</button>
@@ -125,7 +128,7 @@
 
                   <div class="accordion-body">
                     <div class="container mb-4">
-                      <div class="row align-items-center d-sm-none d-md-block">
+                      <div class="row align-items-center d-none d-md-block">
                         <div class="col text-end">
                           <button type="button" class="btn btn-success">No Cronograma</button>
                           <button type="button" class="btn btn-warning">Risco de Atraso</button>
