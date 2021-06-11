@@ -2,7 +2,7 @@ import os
 import time
 from flask import Flask, flash, request, redirect, url_for, abort, render_template
 from werkzeug.utils import secure_filename
-from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML
+from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML, getTotaisProjetosPriorizados
 
 UPLOAD_FOLDER = os.getcwd() + 'upload'
 ALLOWED_EXTENSIONS = {'xlsm', 'xlsx'}
@@ -49,6 +49,7 @@ def upload_file():
         html_emExecucao = getProjetosEmExecucaoHTML(path, mesAnoReferencia)
         html_emDiagnostico = getProjetosEmDiagnosticoHTML(
             path, mesAnoReferencia)
+        totais = getTotaisProjetosPriorizados(projetosJson)
     except:
         mensagemErro = "Houve algum erro no processamento do arquivo, certifique-se de que o arquivo enviado está no padrão necessário."
         return render_template('index.html', mensagem=mensagemErro)
@@ -59,8 +60,7 @@ def upload_file():
         periodoReferencia = '04/2021'
     else:
         periodoReferencia = '05/2021'
-
-    return render_template('dashboard.html', projetos=projetosJson, execucao=html_emExecucao, diagnostico=html_emDiagnostico, periodoReferencia=periodoReferencia)
+    return render_template('dashboard.html', projetos=projetosJson, execucao=html_emExecucao, diagnostico=html_emDiagnostico, periodoReferencia=periodoReferencia, totais=totais)
 
 
 if __name__ == "__main__":

@@ -78,6 +78,22 @@ def getProjetosPriorizadosJSON(path):
     #df.to_html(index=False, classes=['table', 'table-striped'],  justify='left')
 
 
+def getTotaisProjetosPriorizados(listaProjetos):
+    qtdDiagnostico = 0
+    qtdExecucao = 0
+    qtdPactuacao = 0
+    total = 0
+    for projeto in listaProjetos:
+        if projeto['status'] == "diagnostico":
+            qtdDiagnostico += 1
+        elif projeto['status'] == "execucao":
+            qtdExecucao += 1
+        else:
+            qtdPactuacao += 1
+    total = qtdDiagnostico + qtdExecucao + qtdPactuacao
+    return {'total': total, 'execucao': qtdExecucao, 'diagnostico': qtdDiagnostico, 'pactuacao': qtdPactuacao}
+
+
 def getIndicadorKPI(linha):
     try:
         # if linha['Esperado Mai/21'] == None | linha['Realizado Mai/21'] == None:

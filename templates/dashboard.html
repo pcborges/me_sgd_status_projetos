@@ -45,12 +45,12 @@
               <div class="container mb-4">
                 <div class="row align-items-center">
                   <div class="col-md-4">
-                    <h2>Projetos Priorizados: 18</h2>
+                    <h2>Projetos Priorizados: {{totais.total}}</h2>
                   </div>
                   <div class="col-md-4 offset-md-4 text-end">
-                    <button type="button" class="btn btn-success">11 Execução</button>
-                    <button type="button" class="btn btn-primary">5 Diagnóstico</button>
-                    <button type="button" class="btn btn-dark">2 Pactuação</button>
+                    <button type="button" class="btn btn-success">{{totais.execucao}} Execução</button>
+                    <button type="button" class="btn btn-primary">{{totais.diagnostico}} Diagnóstico</button>
+                    <button type="button" class="btn btn-dark">{{totais.pactuacao}} Pactuação</button>
                   </div>
                 </div>
               </div>
