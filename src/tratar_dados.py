@@ -44,6 +44,8 @@ def getProjetosEmExecucaoHTML(path, index_mes_ano_indicador=16):
     projetosEmExecucaoDFTotal = pd.merge(
         emExecucaoDF, indicadoresDF, how='left', on='Nome do projeto')
     projetosEmExecucaoDFTotal.fillna(value={'Farol': 'CINZA'})
+    projetosEmExecucaoDFTotal['Nome do projeto'] = projetosEmExecucaoDFTotal['Nome do projeto'].str.title(
+    )
     return projetosEmExecucaoDFTotal.to_html(index=False, classes=['table', 'table-striped'], justify='left', table_id='emExecucao')
 
 
@@ -63,6 +65,8 @@ def getProjetosEmDiagnosticoHTML(path, index_mes_ano_indicador=16):
     projetosEmDiagnosticoTotal = pd.merge(
         emDiagnosticoDF, indicadoresDF, how='left', on='Nome do projeto')
     projetosEmDiagnosticoTotal.fillna(value={'Farol': 'CINZA'})
+    projetosEmDiagnosticoTotal['Nome do projeto'] = projetosEmDiagnosticoTotal['Nome do projeto'].str.title(
+    )
     return projetosEmDiagnosticoTotal.to_html(index=False, classes=['table', 'table-striped'], justify='left', table_id='emDiagnostico')
 
 
