@@ -42,12 +42,12 @@
           <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
             aria-labelledby="panelsStayOpen-situacaoProjetos">
             <div class="accordion-body">
-              <div class="container mb-4">
+              <div class="container mb-4 d-sm-none d-md-block">
                 <div class="row align-items-center">
-                  <div class="col-md-4">
-                    <h2>Projetos Priorizados: {{totais.total}}</h2>
+                  <div class="col">
+                    <h4>Projetos Priorizados: {{totais.total}}</h4>
                   </div>
-                  <div class="col-md-4 offset-md-4 text-end">
+                  <div class="col text-end">
                     <button type="button" class="btn btn-success">{{totais.execucao}} Execução</button>
                     <button type="button" class="btn btn-primary">{{totais.diagnostico}} Diagnóstico</button>
                     <button type="button" class="btn btn-dark">{{totais.pactuacao}} Pactuação</button>
@@ -93,7 +93,7 @@
                 aria-labelledby="panelsStayOpen-emExecucao">
                 <div class="accordion-body">
                   <div class="container mb-4">
-                    <div class="row align-items-center">
+                    <div class="row align-items-center d-sm-none d-md-block">
                       <div class="col text-end">
                         <button type="button" class="btn btn-success">Na Meta</button>
                         <button type="button" class="btn btn-warning">Em Atenção</button>
@@ -102,9 +102,9 @@
                       </div>
                     </div>
                   </div>
-
-                  {{execucao|safe}}
-
+                  <div class="table-responsive-sm">
+                    {{execucao|safe}}
+                  </div>
                 </div>
               </div>
             </div>
@@ -125,7 +125,7 @@
 
                   <div class="accordion-body">
                     <div class="container mb-4">
-                      <div class="row align-items-center">
+                      <div class="row align-items-center d-sm-none d-md-block">
                         <div class="col text-end">
                           <button type="button" class="btn btn-success">No Cronograma</button>
                           <button type="button" class="btn btn-warning">Risco de Atraso</button>
@@ -134,8 +134,9 @@
                         </div>
                       </div>
                     </div>
-
-                    {{diagnostico|safe}}
+                    <div class="table-responsive-sm">
+                      {{diagnostico|safe}}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -145,8 +146,8 @@
   </main>
   <footer>
     <div class="container mb-3">
-      <div class="row justify-content-center">
-        <div class="col-3">
+      <div class="row text-center">
+        <div class="col">
           <a href="/" class="btn btn-primary btn-lg" role="button">Gerar novo Relatório</a>
         </div>
       </div>
