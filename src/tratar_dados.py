@@ -49,14 +49,18 @@ def getProjetosEmExecucaoHTML(path, index_mes_ano_indicador=16):
 def getProjetosEmDiagnosticoHTML(path, index_mes_ano_indicador=16):
     df = pd.read_excel(path, sheet_name='Startups')
     df = df.loc[0:, ['Nome do projeto', 'Sigla Orgão',
-                     'Status do Projeto', 'Líder do SQUAD']]
+                     'Status do Projeto', 'Fase', 'Líder do SQUAD']]
     df['Nome do projeto'] = df['Nome do projeto'].str.lower()
     df.fillna(value={'Líder do SQUAD': 'N/D'}, inplace=True)
-    emExecucaoDF = df[df['Status do Projeto'].str.contains(
-        "Diagn") | df['Status do Projeto'].str.contains("Prioriza")]
+    emDiagnosticoDF = df[df['Status do Projeto'].str.contains(
+        "Diagn")]
+    emDiagnosticoDF.drop('Status do Projeto', axis='columns', inplace=True)
+    fases = {'1.1 - Prospectado': 'Prospectado', '3.2 - Definição de Escopo': 'Definição de Escopo', '3.4 - Elaboração do ACT e Plano de Trabalho': 'Elaboração do ACT',
+             '4.1 - Assinatura do ACT': 'Assinatura do ACT'}
+    emDiagnosticoDF['Fase'].replace(fases, inplace=True)
     indicadoresDF = getIndicadoresProjetos(path, index_mes_ano_indicador)
     projetosEmDiagnosticoTotal = pd.merge(
-        emExecucaoDF, indicadoresDF, how='left', on='Nome do projeto')
+        emDiagnosticoDF, indicadoresDF, how='left', on='Nome do projeto')
     projetosEmDiagnosticoTotal.fillna(value={'Farol': 'CINZA'})
     return projetosEmDiagnosticoTotal.to_html(index=False, classes=['table', 'table-striped'], justify='left', table_id='emDiagnostico')
 

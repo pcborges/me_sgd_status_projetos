@@ -53,36 +53,40 @@
       </div>
       {% endif %}
       <div class="row">
+        <div class="logo mb-4 text-center"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}"
+            alt="Startup Gov.br" title="Startup Gov.br" height="120px" /></div>
         <div class="col">
-          <h1 class="h3 mb-3 fw-normal">Gerar Relatório</h1>
-          <form id="principalForm" action="/dashboard" method="POST" enctype="multipart/form-data">
-            <div class="mb-3">
-              <label class="form-label">Mês / Ano Referência</label>
-              <select name="mes_ano" class="form-select" aria-label="Default select example">
-                <option value="14">03 / 2021</option>
-                <option value="15">04 / 2021</option>
-                <option value="16">05 / 2021</option>
-              </select>
-              <div class="form-text">Informe o mês e ano de referência para o cálculo dos indicadores.
-              </div>
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title">Gerar Relatório</h4>
+              <form id="principalForm" action="/dashboard" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label class="form-label">Mês / Ano Referência</label>
+                  <select name="mes_ano" class="form-select" aria-label="Default select example">
+                    <option value="14">03 / 2021</option>
+                    <option value="15">04 / 2021</option>
+                    <option value="16">05 / 2021</option>
+                  </select>
+                  <div class="form-text">Informe o mês e ano de referência para o cálculo dos indicadores.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Planilha Excel Modelo</label>
+                  <input type="file" name="file" class="form-control" id="fileUpload" aria-describedby="fileUpload"
+                    aria-label="Upload">
+                  <div class="form-text">Apenas arquivos Excel, no formato padrão da SGD serão aceitos.
+                  </div>
+                </div>
+                <div class="text-end">
+                  <button class="btn btn-success" type="submit" id="fileUpload">
+                    <span id="loader" class="hidden spinner-border spinner-border-sm" role="status"
+                      aria-hidden="true"></span>
+                    Processar
+                  </button>
+                </div>
+              </form>
             </div>
-            <div class="mb-3">
-              <label class="form-label">Planilha Excel Modelo</label>
-              <input type="file" name="file" class="form-control" id="fileUpload" aria-describedby="fileUpload"
-                aria-label="Upload">
-              <div class="form-text">Apenas arquivos Excel, no formato padrão da SGD serão aceitos.
-              </div>
-            </div>
-            <div class="text-end">
-              <button class="btn btn-success" type="submit" id="fileUpload">
-                <span id="loader" class="hidden spinner-border spinner-border-sm" role="status"
-                  aria-hidden="true"></span>
-                Processar
-              </button>
-            </div>
-          </form>
-          <div class="logo mt-4 text-center"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}"
-              alt="Startup Gov.br" title="Startup Gov.br" height="50px" /></div>
+          </div>
         </div>
       </div>
 
