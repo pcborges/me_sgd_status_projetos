@@ -9,101 +9,172 @@
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-
+  <link href="{{ url_for('static', filename='css/custom.css' ) }}" rel="stylesheet">
   <title>Dashboard</title>
-  <style type="text/css">
-    .farol {
-      height: 25px;
-      width: 25px;
-      background-color: #bbb;
-      border-radius: 50%;
-      display: inline-block;
-    }
 
-    .vermelho {
-      background-color: rgb(255, 0, 0);
-    }
-
-    .amarelo {
-      background-color: rgb(255, 208, 0);
-    }
-
-    .verde {
-      background-color: rgb(0, 199, 10);
-    }
-  </style>
 </head>
 
 <body>
+  <div class="container py-3">
+    <div class="topo">
+      <div class="logo"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}" alt="Startup Gov.br"
+          title="Startup Gov.br" height="100%" /></div>
+      <div class="titulo">
+        <h5>Arquivo atualizado em: {{dataModificacao}}</h5>
+      </div>
+    </div>
+  </div>
 
-  <h3>Arquivo atualizado em: {{dataModificacao}}</h3>
   <div class="container mt-4 mb-5">
-    <h1>Projetos Priorizados</h1>
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-      {% for projeto in projetos %}
-      <div class="col">
-        {% if projeto.status == 'execucao' %}
-        <div class="card h-100 text-white bg-success mb-3">
-          {% elif projeto.status == 'diagnostico' %}
-          <div class="card h-100 text-white bg-primary mb-3">
-            {% else %}
-            <div class="card h-100 text-white bg-dark mb-3">
-              {% endif %}
-              <div class="card-body">
-                <h5 class="card-title">{{ projeto.nome }}</h5>
-                <p class="card-text">Líder: {{ projeto.lider }} <br /> Órgão: {{ projeto.sigla_orgao }}</p>
+    <div class="accordion accordion-flush" id="accordion-projetos">
+      <!-- INÍCIO: Situação das Startups -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="panelsStayOpen-situacaoProjetos">
+          <button class="accordion-button accordion-button-1" type="button" data-bs-toggle="collapse"
+            data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+            aria-controls="panelsStayOpen-collapseOne">
+            Situação das Startups
+          </button>
+        </h2>
+        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
+          aria-labelledby="panelsStayOpen-situacaoProjetos">
+          <div class="accordion-body">
+            <div class="container mb-4">
+              <div class="row align-items-center">
+                <div class="col-md-4">
+                  <h2>Projetos Priorizados: 18</h2>
+                </div>
+                <div class="col-md-4 offset-md-4 text-end">
+                  <button type="button" class="btn btn-success">11 Execução</button>
+                  <button type="button" class="btn btn-primary">5 Diagnóstico</button>
+                  <button type="button" class="btn btn-dark">2 Pactuação</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inicio Cards Projetos -->
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+              {% for projeto in projetos %}
+              <div class="col">
+                {% if projeto.status == 'execucao' %}
+                <div class="card h-100 text-white bg-success mb-3">
+                  {% elif projeto.status == 'diagnostico' %}
+                  <div class="card h-100 text-white bg-primary mb-3">
+                    {% else %}
+                    <div class="card h-100 text-white bg-dark mb-3">
+                      {% endif %}
+                      <div class="card-body">
+                        <h5 class="card-title">{{ projeto.nome }}</h5>
+                        <p class="card-text">Líder: {{ projeto.lider }} <br /> Órgão: {{ projeto.sigla_orgao }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                <!-- Fim Cards Projetos -->
               </div>
             </div>
           </div>
-          {% endfor %}
-          <!-- {{projetos}} -->
+          <!-- FIM: Situação das Startups -->
+
+          <!-- INÍCIO: Startups em Execução -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-emExecucao">
+              <button class="accordion-button accordion-button-2 collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                aria-controls="panelsStayOpen-collapseTwo">
+                Startups em Execução
+              </button>
+            </h2>
+            <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+              aria-labelledby="panelsStayOpen-emExecucao">
+              <div class="accordion-body">
+                <div class="container mb-4">
+                  <div class="row align-items-center">
+                    <div class="col text-end">
+                      <button type="button" class="btn btn-success">Na Meta</button>
+                      <button type="button" class="btn btn-warning">Em Atenção</button>
+                      <button type="button" class="btn btn-danger">Em Risco</button>
+                      <button type="button" class="btn btn-light">Sem Dados</button>
+                    </div>
+                  </div>
+                </div>
+
+                {{execucao|safe}}
+
+              </div>
+            </div>
+          </div>
+          <!-- FIM: Startups em Execução -->
+
+          <!-- INÍCIO: Startups em Diagnóstico -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="panelsStayOpen-emDiagnostico">
+              <button class="accordion-button accordion-button-3 collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
+                aria-controls="panelsStayOpen-collapseThree">
+                Startups em Diagnóstico
+              </button>
+            </h2>
+            <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
+              aria-labelledby="panelsStayOpen-emDiagnostico">
+              <div class="accordion-body">
+
+                <div class="accordion-body">
+                  <div class="container mb-4">
+                    <div class="row align-items-center">
+                      <div class="col text-end">
+                        <button type="button" class="btn btn-success">No Cronograma</button>
+                        <button type="button" class="btn btn-warning">Risco de Atraso</button>
+                        <button type="button" class="btn btn-danger">Atrasado</button>
+                        <button type="button" class="btn btn-light">Sem Dados</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {{diagnostico|safe}}
+                </div>
+              </div>
+            </div>
+            <!-- FIM: Startups em Diagnóstico -->
+          </div>
+
+
+
         </div>
 
-      </div>
-      <div class="container">
-        <div class="row">
-          <h1>Startup EM Execução</h1>
-          {{execucao|safe}}
-        </div>
-      </div>
-      <div class="container">
-        <div class="row">
-          <h1>Startup EM Diagnostico</h1>
-          {{diagnostico|safe}}
-        </div>
-      </div>
 
 
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
-        crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+          crossorigin="anonymous"></script>
 
-      <script>
-        function alterarFarois(idtabela) {
-          let tabela = document.getElementById(idtabela);
-          let farol = "";
-          for (let i = 1; i < tabela.rows.length; i++) {
-            farol = tabela.rows[i].cells[4].innerHTML;
-            if (farol == "VERMELHO") {
-              tabela.rows[i].cells[4].outerHTML =
-                "<td><span class='farol vermelho'></span></td>";
-            } else if (farol == "AMARELO") {
-              tabela.rows[i].cells[4].outerHTML =
-                "<td><span class='farol amarelo'></span></td>";
-            } else if (farol == "VERDE") {
-              tabela.rows[i].cells[4].outerHTML =
-                "<td><span class='farol verde'></span></td>";
-            } else {
-              tabela.rows[i].cells[4].outerHTML =
-                "<td><span class='farol'></span></td>";
+        <script>
+          function alterarFarois(idtabela) {
+            let tabela = document.getElementById(idtabela);
+            let farol = "";
+            for (let i = 1; i < tabela.rows.length; i++) {
+              farol = tabela.rows[i].cells[4].innerHTML;
+              if (farol == "VERMELHO") {
+                tabela.rows[i].cells[4].outerHTML =
+                  "<td><span class='farol vermelho'></span></td>";
+              } else if (farol == "AMARELO") {
+                tabela.rows[i].cells[4].outerHTML =
+                  "<td><span class='farol amarelo'></span></td>";
+              } else if (farol == "VERDE") {
+                tabela.rows[i].cells[4].outerHTML =
+                  "<td><span class='farol verde'></span></td>";
+              } else {
+                tabela.rows[i].cells[4].outerHTML =
+                  "<td><span class='farol'></span></td>";
+              }
             }
           }
-        }
-        window.onload = () => {
-          alterarFarois("emExecucao");
-          alterarFarois("emDiagnostico");
-        }
-      </script>
+          window.onload = () => {
+            alterarFarois("emExecucao");
+            alterarFarois("emDiagnostico");
+          }
+        </script>
 
 </body>
 

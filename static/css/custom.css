@@ -1,0 +1,139 @@
+.topo {
+  height: 100px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.topo .logo {
+  float: left;
+  width: 50%;
+  height: 100%;
+}
+
+.topo .titulo {
+  float: right;
+  width: 50%;
+  height: 100%;
+  text-align: right;
+}
+
+.topo h1,
+.topo h2,
+.topo h3,
+.topo h4,
+.topo h5 {
+  margin-top: 30px;
+}
+
+.accordion-item {
+  border: 0px !important;
+  margin-bottom: 20px !important;
+}
+
+.accordion-button {
+  color: #ffffff !important;
+  font-weight: bold;
+  text-transform: uppercase;
+  height: 100px;
+  font-size: 25px;
+}
+
+.accordion-button-1 {
+  background-color: #ffc000 !important;
+  border-radius: 5px !important;
+}
+
+.accordion-button-2 {
+  background-color: #70ad47 !important;
+  border-radius: 5px !important;
+}
+
+.accordion-button-3 {
+  background-color: #4472c4 !important;
+  border-radius: 5px !important;
+}
+
+.bg-execucao {
+  background-color: #70ad47 !important;
+  color: #ffffff !important;
+}
+
+.bg-diagnostico {
+  background-color: #4472c4 !important;
+  color: #ffffff !important;
+}
+
+.bg-pactuacao {
+  background-color: #7f7f7f !important;
+  color: #ffffff !important;
+}
+
+.legenda {
+  position: relative;
+  float: right;
+  height: 50px;
+}
+
+.legenda ul {
+  margin-top: 10px !important;
+  list-style: none;
+}
+
+.legenda ul li {
+  display: inline;
+  font-size: 14px;
+  padding: 10px;
+  margin-left: 10px;
+  border-radius: 5px;
+}
+
+.bg-success {
+  background-color: #70ad47 !important;
+  color: #ffffff !important;
+}
+
+.bg-warning {
+  background-color: #ffc000 !important;
+  color: #ffffff !important;
+}
+
+.bg-danger {
+  background-color: #f20505 !important;
+  color: #ffffff !important;
+}
+
+.bg-nodata {
+  background-color: #7f7f7f !important;
+  color: #ffffff !important;
+}
+
+/* .farol {
+	width: 40px;
+	height: 40px;
+	padding-top: 9px;
+	margin: 0 auto;
+	border-radius: 50%;
+	text-align: center;
+	font-weight: bold;
+	font-size: 90%;
+} */
+
+.farol {
+  height: 25px;
+  width: 25px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.vermelho {
+  background-color: rgb(255, 0, 0);
+}
+
+.amarelo {
+  background-color: rgb(255, 208, 0);
+}
+
+.verde {
+  background-color: rgb(0, 199, 10);
+}
