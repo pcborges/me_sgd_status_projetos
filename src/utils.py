@@ -7,11 +7,11 @@ ALLOWED_EXTENSIONS = {'xlsm', 'xlsx'}
 
 
 def getGoogleCredentials():
-    PROJECT_ID = os.getenv("PROJECT_ID")
-    PRIVATE_KEY_ID = os.getenv("PRIVATE_KEY_ID")
-    PRIVATE_KEY = os.getenv("PRIVATE_KEY")
-    CLIENT_EMAIL = os.getenv("CLIENT_EMAIL")
-    CLIENT_ID = os.getenv("CLIENT_ID")
+    PROJECT_ID = os.environ.get("PROJECT_ID")
+    PRIVATE_KEY_ID = os.environ.get("PRIVATE_KEY_ID")
+    PRIVATE_KEY = os.environ.get("PRIVATE_KEY")
+    CLIENT_EMAIL = os.environ.get("CLIENT_EMAIL")
+    CLIENT_ID = os.environ.get("CLIENT_ID")
 
     with open(os.getcwd() + '/credentials/sgdkeybigquery.json', 'r') as f:
         credenciais = json.load(f)
