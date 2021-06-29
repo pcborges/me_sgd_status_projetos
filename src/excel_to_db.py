@@ -1,12 +1,11 @@
 import pandas as pd
 import time
 from google.oauth2 import service_account
-from src.utils import getGoogleCredentials
 
 
 def uploadDataGBQ(path):
-    credentials = service_account.Credentials.from_service_account_info(
-        getGoogleCredentials())
+    credentials = service_account.Credentials.from_service_account_file(
+        'google-credentials.json')
 
     start_time = time.time()
     # Importar dados da planilha na aba KPI's
