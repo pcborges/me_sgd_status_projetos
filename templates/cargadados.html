@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+  <script src="{{ url_for('static', filename='js/custom.js' ) }}"></script>
+  <link href="{{ url_for('static', filename='css/custom.css' ) }}" rel="stylesheet">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <title>Upload DB</title>
+  <style type="text/css">
+    *,
+    ::after,
+    ::before {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      padding-top: 40px;
+      padding-bottom: 40px;
+      background-color: #f5f5f5;
+    }
+
+    .form-upload {
+      width: 100%;
+      max-width: 620px;
+      padding: 15px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+
+<body class="">
+
+  <main id="main" class="form-upload">
+    <div class="container">
+      {% if erro %}
+      <div class="alert alert-warning" role="alert">
+        {{erro}}
+      </div>
+      {% endif %}
+      {% if sucesso %}
+      <div class="alert alert-success" role="alert">
+        {{sucesso}}
+      </div>
+      {% endif %}
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title">Carregar Banco de Dados</h4>
+              <form id="principalForm" action="/bigquery" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <input type="file" name="file" class="form-control" id="fileUpload" aria-describedby="fileUpload"
+                    aria-label="Upload">
+                  <div class="form-text">Apenas arquivos Excel, no formato padrão da SGD serão aceitos.
+                  </div>
+                </div>
+                <div class="text-end">
+                  <button class="btn btn-success" type="submit" id="fileUpload">
+                    <span id="loader" class="hidden spinner-border spinner-border-sm" role="status"
+                      aria-hidden="true"></span>
+                    Processar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="logo mt-4 text-center"><img src="{{ url_for('static', filename='images/startup_gov_logo.png' ) }}"
+              alt="Startup Gov.br" title="Startup Gov.br" height="80px" /></div>
+        </div>
+      </div>
+
+
+    </div>
+  </main>
+
+
+  <!-- Optional JavaScript; choose one of the two! -->
+
+  <!-- Option 1: Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+    crossorigin="anonymous"></script>
+
+  <!-- Option 2: Separate Popper and Bootstrap JS -->
+  <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
+    -->
+</body>
+
+</html>
