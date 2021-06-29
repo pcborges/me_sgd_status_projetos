@@ -13,7 +13,7 @@ def getGoogleCredentials():
     CLIENT_EMAIL = os.getenv("CLIENT_EMAIL")
     CLIENT_ID = os.getenv("CLIENT_ID")
 
-    with open('credentials\sgdkeybigquery.json', 'r') as f:
+    with open(os.getcwd() + '/credentials/sgdkeybigquery.json', 'r') as f:
         credenciais = json.load(f)
 
     credenciais["project_id"] = PROJECT_ID

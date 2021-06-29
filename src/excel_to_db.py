@@ -2,9 +2,6 @@ import pandas as pd
 import time
 from google.oauth2 import service_account
 from src.utils import getGoogleCredentials
-import os
-
-SGB_BIGQUERY_JSON = os.getenv("SGB_BIGQUERY_JSON")
 
 
 def uploadDataGBQ(path):
