@@ -1,6 +1,7 @@
 import pandas as pd
 import time
 from google.oauth2 import service_account
+from datetime import datetime
 
 
 def uploadDataGBQ(path):
@@ -13,9 +14,13 @@ def uploadDataGBQ(path):
                            sheet_name='06-Apoio-KPIs consolidados', header=1)
 
     # Converter colunas dos KPIS REALIZADOS em float
-    for x in range(37, 61):
-        nomeColuna = kpisDF.columns[x]
-        kpisDF[nomeColuna] = pd.to_numeric(kpisDF[nomeColuna], errors='coerce')
+    try:
+        for x in range(37, 61):
+            nomeColuna = kpisDF.columns[x]
+            kpisDF[nomeColuna] = pd.to_numeric(
+                kpisDF[nomeColuna], errors='coerce')
+    except:
+        return 'Problemas ao converter colunas de kpis para float'
 
     # DE_PARA de colunas e nomes que devem ser renomeados para facilitar a leitura
     renameColumns = {
@@ -74,18 +79,25 @@ def uploadDataGBQ(path):
         '2022-12-01 00:00:00.1': 'real_dez_2022',
         'Última importação': 'ultima_importacao'
     }
-
-    # Gerar o Dataframe sem as colunas desnecessárias e com o nome das colunas renomeados.
-    kpisLimpoDF = kpisDF.drop([kpisDF.columns[0], 'Fonte', 'Valor \nbase', 'Valor \nalvo', 'Atual', 'Linha de base', 'Responsável', 'Atual.1', '%Realizado',
-                               'Unnamed: 63', 'Unnamed: 64', 'Formula'], axis='columns')
-    kpisLimpoDF.rename(columns=renameColumns, inplace=True)
-    kpisLimpoDF.fillna({'kpi': 'Não Informado'}, inplace=True)
-    kpisLimpoDF.fillna(0, inplace=True)
+    try:
+        # Gerar o Dataframe sem as colunas desnecessárias e com o nome das colunas renomeados.
+        kpisLimpoDF = kpisDF.drop([kpisDF.columns[0], 'Fonte', 'Valor \nbase', 'Valor \nalvo', 'Atual', 'Linha de base', 'Responsável', 'Atual.1', '%Realizado',
+                                   'Unnamed: 63', 'Unnamed: 64', 'Formula'], axis='columns')
+        kpisLimpoDF.rename(columns=renameColumns, inplace=True)
+        kpisLimpoDF.fillna({'kpi': 'Não Informado'}, inplace=True)
+        kpisLimpoDF.fillna(0, inplace=True)
+    except:
+        return 'Problemas ao converter colunas do excel, verificar nomes e estrutura da tabela.'
 
     # Definição dos períodos
     periodo = ['jan_2021', 'fev_2021', 'mar_2021', 'abr_2021', 'mai_2021', 'jun_2021', 'jul_2021', 'ago_2021',
                'set_2021', 'out_2021', 'nov_2021', 'dez_2021', 'jan_2022', 'fev_2022', 'mar_2022', 'abr_2022', 'mai_2022',
                'jun_2022', 'jul_2022', 'ago_2022', 'set_2022', 'out_2022', 'nov_2022', 'dez_2022']
+
+    periodoDate = ['01/01/21 10:00:00', '01/02/21 10:00:00', '01/03/21 10:00:00', '01/04/21 10:00:00', '01/05/21 10:00:00', '01/06/21 10:00:00',
+                   '01/07/21 10:00:00', '01/08/21 10:00:00', '01/09/21 10:00:00', '01/10/21 10:00:00', '01/11/21 10:00:00', '01/12/21 10:00:00', '01/01/22 10:00:00',
+                   '01/02/22 10:00:00', '01/03/22 10:00:00', '01/04/22 10:00:00', '01/05/22 10:00:00', '01/06/22 10:00:00', '01/07/22 10:00:00',
+                   '01/08/22 10:00:00', '01/09/22 10:00:00', '01/10/22 10:00:00', '01/11/22 10:00:00', '01/12/22 10:00:00']
 
     # Funcao que calcula e separa os kpis por periodo e retorna um dicionário com os dados
 
@@ -100,24 +112,27 @@ def uploadDataGBQ(path):
 
                 try:
                     if ((linha[realizado] * 100) / linha[previsto]) >= 80:
-                        farol = 'VERDE'  # 1  # VERDE
+                        farol = 1  # VERDE
                     elif (((linha[realizado] * 100) / linha[previsto]) >= 60) & (((linha[realizado] * 100) / linha[previsto]) < 80):
-                        farol = 'AMARELO'  # 2  # AMARELO
+                        farol = 2  # AMARELO
                     else:
-                        farol = 'VERMELHO'  # 3  # VERMELHO
+                        farol = 3  # VERMELHO
                 except ZeroDivisionError:
-                    farol = 'CINZA'  # 4  # CINZA
+                    farol = 4  # CINZA
 
                 try:
                     calculado = linha[realizado] / linha[previsto]
                 except ZeroDivisionError:
                     calculado = 0
 
+                date_time_obj = datetime.strptime(
+                    periodoDate[indice_periodo], '%d/%m/%y %H:%M:%S')
+
                 data.append({
                     "nome_projeto": linha.nome_projeto,
                     "tipo_kpi": linha.tipo_kpi,
                     'kpi': linha.kpi,
-                    'periodo': periodo[indice_periodo],
+                    'periodo': date_time_obj,
                     'previsto': linha[previsto],
                     'realizado': linha[realizado],
                     'calculado': calculado,
@@ -137,8 +152,7 @@ def uploadDataGBQ(path):
         kpisConsolidados.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
                                 if_exists='replace', project_id='sgdgovbr')
     except:
-        print('Deu erro na hora de jogar os dados no GBQ')
-        return 'Deu erro'
+        return 'Erro ao salvar dados convertidos no BigQuery'
 
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
     return 'OK'

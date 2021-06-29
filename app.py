@@ -5,9 +5,7 @@ from src.excel_to_db import uploadDataGBQ
 from src.utils import validateFileReq
 import config
 
-
 UPLOAD_FOLDER = os.getcwd() + 'upload'
-ALLOWED_EXTENSIONS = {'xlsm', 'xlsx'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -23,11 +21,6 @@ def carga():
     return render_template('cargadados.html')
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 @app.route('/bigquery', methods=['POST'])
 def big_query():
     if request.method == 'POST':
@@ -35,11 +28,11 @@ def big_query():
         path = resp['path']
         if path == '':
             return render_template('index.html', mensagem=resp['message'])
-    processamento = uploadDataGBQ(path)
-    if processamento == 'OK':
-        return render_template('cargadados.html', sucesso='Dados carregados com sucesso!')
-    else:
-        return render_template('cargadados.html', erro=processamento)
+        processamento = uploadDataGBQ(path)
+        if processamento == 'OK':
+            return render_template('cargadados.html', sucesso='Dados carregados com sucesso!')
+        else:
+            return render_template('cargadados.html', erro=processamento)
 
 
 @app.route('/dashboard', methods=['POST'])
