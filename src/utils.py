@@ -1,5 +1,4 @@
 import os
-import json
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = os.getcwd() + 'upload'

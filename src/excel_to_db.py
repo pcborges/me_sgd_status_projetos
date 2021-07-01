@@ -3,11 +3,49 @@ import time
 from google.oauth2 import service_account
 from datetime import datetime
 
+credentials = service_account.Credentials.from_service_account_file(
+    'google-credentials.json')
 
-def uploadDataGBQ(path):
-    credentials = service_account.Credentials.from_service_account_file(
-        'google-credentials.json')
 
+def startupsToDB(path):
+    # Importar dados da planilha na aba KPI's
+    print('CARGA_STARTUPS_INICIO')
+    startupsDF = pd.read_excel(path,
+                               sheet_name='Apoio-Projetos')
+    metadadosDF = pd.read_excel(path, sheet_name='Apoio-Metadados', header=1)
+    # tratar informações das Startups
+    try:
+        startupsDF.rename(columns={'Area/Projeto': 'nome_projeto', 'Orgao': 'orgao', 'Status': 'status', 'Relato': 'relato',
+                          'Pontos de Atenção': 'pontos_atencao', 'Última Atualização': 'ultima_atualizacao'}, inplace=True)
+        startupsDF['relato'].replace(
+            ['^\s', '\t', '\n'], value='', regex=True, inplace=True)
+
+    except:
+        return 'Problemas ao converter dados da Aba Apoio-Projetos'
+    # tratar informações da aba de metadados
+    try:
+        metadadosFiltradoDF = metadadosDF.iloc[:, 0:3]
+        metadadosFiltradoDF.rename(columns={
+                                   'ID': 'id', 'Nome Resumido': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
+    except:
+        return 'Problemas ao converter dados da Aba Apoio-Metadados'
+    # Consolidar informações em um único dataframe
+    startupsConsolidadoDF = metadadosFiltradoDF.merge(
+        startupsDF, on='nome_projeto', how='left')
+    startupsConsolidadoDF.fillna({'orgao': 'N/D', 'relato': 'N/D',
+                                  'pontos_atencao': 'N/D', 'ultima_atualizacao': '', 'status': 'Pactuação'}, inplace=True)
+    # Enviar dados tratados para o GBQ
+    try:
+        startupsConsolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.startups',
+                                     if_exists='replace', project_id='sgdgovbr')
+    except:
+        return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
+    print('CARGA_STARTUPS_FIM')
+    return 'OK'
+
+
+def kpisToDB(path):
+    print('CARGA_KPIS_INICIO')
     start_time = time.time()
     # Importar dados da planilha na aba KPI's
     kpisDF = pd.read_excel(path,
@@ -112,13 +150,13 @@ def uploadDataGBQ(path):
 
                 try:
                     if ((linha[realizado] * 100) / linha[previsto]) >= 80:
-                        farol = 1  # VERDE
+                        farol = 4  # VERDE
                     elif (((linha[realizado] * 100) / linha[previsto]) >= 60) & (((linha[realizado] * 100) / linha[previsto]) < 80):
-                        farol = 2  # AMARELO
+                        farol = 3  # AMARELO
                     else:
-                        farol = 3  # VERMELHO
+                        farol = 2  # VERMELHO
                 except ZeroDivisionError:
-                    farol = 4  # CINZA
+                    farol = 1  # CINZA
 
                 try:
                     calculado = linha[realizado] / linha[previsto]
@@ -152,7 +190,8 @@ def uploadDataGBQ(path):
         kpisConsolidados.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
                                 if_exists='replace', project_id='sgdgovbr')
     except:
-        return 'Erro ao salvar dados convertidos no BigQuery'
+        return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
 
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
+    print('CARGA_KPIS_FIM')
     return 'OK'
