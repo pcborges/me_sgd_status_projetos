@@ -1,7 +1,7 @@
 import os
-from flask import Flask,  request,  render_template
+from flask import Flask,  request,  render_template, flash
 from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML, getTotaisProjetosPriorizados
-from src.excel_to_db import uploadDataGBQ
+from src.excel_to_db import kpisToDB, startupsToDB
 from src.utils import validateFileReq
 import config
 
@@ -9,6 +9,12 @@ UPLOAD_FOLDER = os.getcwd() + 'upload'
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = "sgdapp"
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html')
 
 
 @app.route('/')
@@ -16,23 +22,46 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/carga')
-def carga():
-    return render_template('cargadados.html')
+@app.route('/upload')
+def upload():
+    return render_template('upload_form.html')
 
 
-@app.route('/bigquery', methods=['POST'])
-def big_query():
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard_ds.html')
+
+
+@app.route('/data-load', methods=['POST'])
+def data_load():
     if request.method == 'POST':
         resp = validateFileReq(request)
         path = resp['path']
         if path == '':
             return render_template('index.html', mensagem=resp['message'])
-        processamento = uploadDataGBQ(path)
-        if processamento == 'OK':
-            return render_template('cargadados.html', sucesso='Dados carregados com sucesso!')
-        else:
-            return render_template('cargadados.html', erro=processamento)
+        # Validar se os campos checkbox estão marcados
+        msgStartups = None
+        msgKpis = None
+        if request.form.get('carga_startups'):
+            msgStartups = startupsToDB(path)
+        if request.form.get('carga_kpis'):
+            msgKpis = kpisToDB(path)
+
+        print(msgKpis, 'outra ', msgStartups)
+        if not msgKpis == None:
+            if msgKpis == 'OK':
+                flash('Dados dos Indicadores carregados com sucesso.',
+                      category='success')
+            else:
+                flash(msgKpis, category='error')
+
+        if not msgStartups == None:
+            if msgStartups == 'OK':
+                flash('Dados das Startups carregados com sucesso.',
+                      category='success')
+            else:
+                flash(msgStartups, category='error')
+        return render_template('upload_form.html')
 
 
 @app.route('/dashboard', methods=['POST'])

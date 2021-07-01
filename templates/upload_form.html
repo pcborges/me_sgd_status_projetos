@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}
+Upload
+{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-8 ">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Carregar Banco de Dados</h4>
+        <form id="principalForm" action="/data-load" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <input type="file" name="file" class="form-control" id="fileUpload" aria-describedby="fileUpload"
+              aria-label="Upload">
+            <div class="form-text">Apenas arquivos Excel, no formato padrão da SGD serão aceitos.
+            </div>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="carga_startups" name="carga_startups" checked>
+            <label class="form-check-label" for="carga_startups">Carregar Dados das Startups</label>
+          </div>
+          <div class="mb-3 form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="carga_kpis" name="carga_kpis" checked>
+            <label class="form-check-label" for="carga_kpis">Carregar Dados dos Indicadores</label>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-success" type="submit" id="fileUpload">
+              <span id="loader" class="hidden spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Processar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
