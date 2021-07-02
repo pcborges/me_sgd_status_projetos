@@ -162,7 +162,9 @@ def kpisToDB(path):
                 farol = 0
 
                 try:
-                    if ((linha[realizado] * 100) / linha[previsto]) >= 80:
+                    if linha[realizado] == 0 or linha[realizado] == None:
+                        farol = 1  # CINZA
+                    elif ((linha[realizado] * 100) / linha[previsto]) >= 80:
                         farol = 4  # VERDE
                     elif (((linha[realizado] * 100) / linha[previsto]) >= 60) & (((linha[realizado] * 100) / linha[previsto]) < 80):
                         farol = 3  # AMARELO
