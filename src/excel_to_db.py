@@ -10,9 +10,14 @@ credentials = service_account.Credentials.from_service_account_file(
 def startupsToDB(path):
     # Importar dados da planilha na aba KPI's
     print('CARGA_STARTUPS_INICIO')
-    startupsDF = pd.read_excel(path,
-                               sheet_name='Apoio-Projetos')
-    metadadosDF = pd.read_excel(path, sheet_name='Apoio-Metadados', header=1)
+    start_time = time.time()
+    try:
+        startupsDF = pd.read_excel(path,
+                                   sheet_name='Apoio-Projetos')
+        metadadosDF = pd.read_excel(
+            path, sheet_name='Apoio-Metadados', header=1)
+    except:
+        return 'Aba de Apoio-Projetos ou Apoio-Metadados não encontrada.'
     # tratar informações das Startups
     try:
         startupsDF.rename(columns={'Area/Projeto': 'nome_projeto', 'Orgao': 'orgao', 'Status': 'status', 'Relato': 'relato',
@@ -39,7 +44,8 @@ def startupsToDB(path):
         startupsConsolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.startups',
                                      if_exists='replace', project_id='sgdgovbr')
     except:
-        return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
+        return 'Erro ao salvar dados convertidos da aba Apoio-Projetos no banco de dados.'
+    print('Tempo de execução: %s segundos' % (time.time() - start_time))
     print('CARGA_STARTUPS_FIM')
     return 'OK'
 
@@ -48,8 +54,13 @@ def kpisToDB(path):
     print('CARGA_KPIS_INICIO')
     start_time = time.time()
     # Importar dados da planilha na aba KPI's
-    kpisDF = pd.read_excel(path,
-                           sheet_name='06-Apoio-KPIs consolidados', header=1)
+    try:
+        kpisDF = pd.read_excel(path,
+                               sheet_name='06-Apoio-KPIs consolidados', header=1)
+        metadadosDF = pd.read_excel(
+            path, sheet_name='Apoio-Metadados', header=1)
+    except:
+        return 'Aba 06-Apoio-KPIs consolidados ou Apoio-Metadados não encontrada'
 
     # Converter colunas dos KPIS REALIZADOS em float
     try:
@@ -124,6 +135,8 @@ def kpisToDB(path):
         kpisLimpoDF.rename(columns=renameColumns, inplace=True)
         kpisLimpoDF.fillna({'kpi': 'Não Informado'}, inplace=True)
         kpisLimpoDF.fillna(0, inplace=True)
+        kpisLimpoDF.drop(kpisLimpoDF[kpisLimpoDF['nome_projeto']
+                         == 'Indicadores Consolidados'].index, inplace=True)
     except:
         return 'Problemas ao converter colunas do excel, verificar nomes e estrutura da tabela.'
 
@@ -184,11 +197,21 @@ def kpisToDB(path):
     # remover espaços do inicio da descrição dos KPI's
     kpisConsolidados['kpi'].replace(
         ['^\s', '\n'], value='', regex=True, inplace=True)
+    # Limpar a tabela de METADADOS tirando o que não é útil
+    metadadosFiltradoDF = metadadosDF.iloc[:, 0:3]
+    metadadosFiltradoDF.rename(columns={
+                               'ID': 'id', 'Nome Resumido': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
+
+    consolidadoDF = kpisConsolidados.merge(
+        metadadosFiltradoDF, on="nome_projeto", how="left")
+    columns_order = ['id', 'nome_projeto', 'nome_resumido', 'tipo_kpi',
+                     'kpi', 'periodo', 'previsto', 'realizado', 'calculado', 'farol']
+    consolidadoDF = consolidadoDF.reindex(columns=columns_order)
 
     # Enviar dados tratados para o GBQ
     try:
-        kpisConsolidados.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
-                                if_exists='replace', project_id='sgdgovbr')
+        consolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
+                             if_exists='replace', project_id='sgdgovbr')
     except:
         return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
 
