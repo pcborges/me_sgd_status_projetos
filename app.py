@@ -47,7 +47,6 @@ def data_load():
         if request.form.get('carga_kpis'):
             msgKpis = kpisToDB(path)
 
-        print(msgKpis, 'outra ', msgStartups)
         if not msgKpis == None:
             if msgKpis == 'OK':
                 flash('Dados dos Indicadores carregados com sucesso.',
