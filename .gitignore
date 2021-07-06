@@ -140,3 +140,4 @@ cython_debug/
 #Custom
 google-credentials.json
 upload/
+.vscode/
