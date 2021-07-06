@@ -16,7 +16,7 @@ def startupsToDB(path):
                                    sheet_name='Apoio-Projetos')
         metadadosDF = pd.read_excel(
             path, sheet_name='Apoio-Metadados', header=1)
-    except:
+    except Exception:
         return 'Aba de Apoio-Projetos ou Apoio-Metadados não encontrada.'
     # tratar informações das Startups
     try:
@@ -25,14 +25,14 @@ def startupsToDB(path):
         startupsDF['relato'].replace(
             ['^\s', '\t', '\n'], value='', regex=True, inplace=True)
 
-    except:
+    except Exception:
         return 'Problemas ao converter dados da Aba Apoio-Projetos'
     # tratar informações da aba de metadados
     try:
         metadadosFiltradoDF = metadadosDF.iloc[:, 0:3]
         metadadosFiltradoDF.rename(columns={
                                    'ID': 'id', 'Nome Resumido': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
-    except:
+    except Exception:
         return 'Problemas ao converter dados da Aba Apoio-Metadados'
     # Consolidar informações em um único dataframe
     startupsConsolidadoDF = metadadosFiltradoDF.merge(
@@ -43,7 +43,7 @@ def startupsToDB(path):
     try:
         startupsConsolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.startups',
                                      if_exists='replace', project_id='sgdgovbr')
-    except:
+    except Exception:
         return 'Erro ao salvar dados convertidos da aba Apoio-Projetos no banco de dados.'
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
     print('CARGA_STARTUPS_FIM')
@@ -59,7 +59,7 @@ def kpisToDB(path):
                                sheet_name='06-Apoio-KPIs consolidados', header=1)
         metadadosDF = pd.read_excel(
             path, sheet_name='Apoio-Metadados', header=1)
-    except:
+    except Exception:
         return 'Aba 06-Apoio-KPIs consolidados ou Apoio-Metadados não encontrada'
 
     # Converter colunas dos KPIS REALIZADOS em float
@@ -68,7 +68,7 @@ def kpisToDB(path):
             nomeColuna = kpisDF.columns[x]
             kpisDF[nomeColuna] = pd.to_numeric(
                 kpisDF[nomeColuna], errors='coerce')
-    except:
+    except Exception:
         return 'Problemas ao converter colunas de kpis para float'
 
     # DE_PARA de colunas e nomes que devem ser renomeados para facilitar a leitura
@@ -137,7 +137,7 @@ def kpisToDB(path):
         kpisLimpoDF.fillna(0, inplace=True)
         kpisLimpoDF.drop(kpisLimpoDF[kpisLimpoDF['nome_projeto']
                          == 'Indicadores Consolidados'].index, inplace=True)
-    except:
+    except Exception:
         return 'Problemas ao converter colunas do excel, verificar nomes e estrutura da tabela.'
 
     # Definição dos períodos
@@ -214,9 +214,43 @@ def kpisToDB(path):
     try:
         consolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
                              if_exists='replace', project_id='sgdgovbr')
-    except:
+    except Exception:
         return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
 
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
     print('CARGA_KPIS_FIM')
     return 'OK'
+
+
+def projetosToDB(path):
+    # Importar dados da planilha na aba KPI's
+    print('CARGA_PROJETOS_INICIO')
+    start_time = time.time()
+    try:
+        projetosDF = pd.read_excel(path, sheet_name='01-Projetos')
+    except Exception:
+        return 'Aba 01-Projetos não encontrada, verifique se o arquivo enviado está no padrão esperado.'
+    
+    newColumnsNames = {'Orgão' : 'orgao',	'Sigla Orgão': 'sigla_orgao', 	'Nome do projeto' : 'nome_projeto',	'Escopo do Projeto': 'escopo_projeto', 	'Números do Projeto' : 'numeros_projeto', 	'Recomendação de Implantação' : 'recomendacao_implantacao', 	'Motivo Recomendação' : 'motivo_recomendacao', 	'Status do Projeto': 'status_projeto', 	'Fase' : 'fase_projeto', 	'Substituto' : 'lider_substituto', 	'Líder no Órgão': 'lider_orgao', 	'Líder do SQUAD' : 'lider_squad', 	'Gestão' : 'qtd_gestao', 'Equipe SGD': 'qtd_equipe_sgd',	'Temporários' : 'qtd_temporarios',	'Pessoas Alocadas' : 'qtd_pessoas_alocadas', 	'Nível de Risco' : 'nivel_risco_projeto', 	'Pontos de Atenção': 'pontos_atencao', 	'Relato' : 'relato',	'Processo SEI' : 'processo_sei'}
+    # Enviar dados tratados para o GBQ
+    try:
+        projetosDF = projetosDF.iloc[0:, 1:20]
+        projetosDF.rename(columns=newColumnsNames, inplace=True)
+        projetosDF.fillna({'qtd_gestao' : 0,	'qtd_equipe_sgd' : 0,	'qtd_temporarios' : 0}, inplace=True)
+        projetosDF.fillna('N/D', inplace=True)
+    except Exception:
+        return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
+
+    # Enviar dados tratados para o GBQ
+    try:
+        projetosDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.projetos',
+                             if_exists='replace', project_id='sgdgovbr')
+    except Exception:
+        print(Exception)
+        return 'Erro ao salvar dados convertidos de Projetos para o BigQuery'
+    
+    print('Tempo de execução: %s segundos' % (time.time() - start_time))
+    print('CARGA_PROJETOS_FIM')
+    return 'OK'
+
+
