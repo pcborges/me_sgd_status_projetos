@@ -7,16 +7,18 @@ Upload
   <div class="accordion accordion-flush" id="accordionExample">
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+          aria-expanded="true" aria-controls="collapseOne">
           Carregar Dados Indicadores
         </button>
       </h2>
-      <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+      <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+        data-bs-parent="#accordionExample">
         <div class="accordion-body">
           <form id="indicadoresForm" action="/upload-indicadores" method="POST" enctype="multipart/form-data">
             <div class="mb-3">
-              <input type="file" name="file" class="form-control" id="fileIndicadores" aria-describedby="fileIndicadores"
-              aria-label="Upload">
+              <input type="file" name="file" class="form-control" id="fileIndicadores"
+                aria-describedby="fileIndicadores" aria-label="Upload">
               <div class="form-text">Apenas arquivos Excel, no formato padrão da SGD serão aceitos.
               </div>
             </div>
@@ -30,7 +32,6 @@ Upload
             </div>
             <div class="text-end">
               <button class="btn btn-success" type="submit" id="uploadIndicadores">
-                <span id="loader" class="hidden spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Processar
               </button>
             </div>
@@ -40,22 +41,23 @@ Upload
     </div>
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingTwo">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+          aria-expanded="false" aria-controls="collapseTwo">
           Carregar Dados Projetos
         </button>
       </h2>
-      <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+      <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+        data-bs-parent="#accordionExample">
         <div class="accordion-body">
           <form id="projetosForm" action="/upload-projetos" method="POST" enctype="multipart/form-data">
             <div class="mb-3">
               <input type="file" name="file" class="form-control" id="fileProjetos" aria-describedby="fileProjetos"
-              aria-label="Upload">
+                aria-label="Upload">
               <div class="form-text">Apenas arquivos Excel, no formato padrão da SGD serão aceitos.
               </div>
             </div>
             <div class="text-end">
               <button class="btn btn-success" type="submit" id="uploadProjetos">
-                <span id="loader" class="hidden spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Processar
               </button>
             </div>
@@ -65,5 +67,5 @@ Upload
     </div>
   </div>
 </div>
-  
-  {% endblock %}
+
+{% endblock %}

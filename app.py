@@ -34,7 +34,6 @@ def dashboard():
 
 @app.route('/upload-indicadores', methods=['POST'])
 def upload_indicadores():
-    print('cheguei aqui')
     if request.method == 'POST':
         resp = validateFileReq(request)
         try:
@@ -42,7 +41,7 @@ def upload_indicadores():
         except KeyError:
             flash('Arquivo é obrigatório', category='error')
             return render_template('upload_form.html')
-            #return render_template('index.html', mensagem=resp['message'])
+            # return render_template('index.html', mensagem=resp['message'])
         # Validar se os campos checkbox estão marcados
         msgStartups = None
         msgKpis = None
@@ -66,6 +65,7 @@ def upload_indicadores():
                 flash(msgStartups, category='error')
         return render_template('upload_form.html')
 
+
 @app.route('/upload-projetos', methods=['POST'])
 def upload_projetos():
     if request.method == 'POST':
@@ -77,14 +77,15 @@ def upload_projetos():
             return render_template('upload_form.html')
 
         msgProjetos = projetosToDB(path)
-    
+
         if msgProjetos == 'OK':
             flash('Dados dos Indicadores carregados com sucesso.',
-                    category='success')
+                  category='success')
         else:
             flash(msgProjetos, category='error')
 
         return render_template('upload_form.html')
+
 
 @app.route('/dashboard', methods=['POST'])
 def upload_file():
@@ -117,4 +118,4 @@ def upload_file():
 
 
 if __name__ == "__main__":
-    app.run(debug=True,port=33507)
+    app.run(port=33507)
