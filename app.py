@@ -1,7 +1,7 @@
 import os
 from flask import Flask,  request,  render_template, flash
 from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML, getTotaisProjetosPriorizados
-from src.excel_to_db import kpisToDB, startupsToDB
+from src.excel_to_db import kpisToDB, startupsToDB, projetosToDB
 from src.utils import validateFileReq
 import config
 
@@ -32,13 +32,17 @@ def dashboard():
     return render_template('dashboard_ds.html')
 
 
-@app.route('/data-load', methods=['POST'])
-def data_load():
+@app.route('/upload-indicadores', methods=['POST'])
+def upload_indicadores():
+    print('cheguei aqui')
     if request.method == 'POST':
         resp = validateFileReq(request)
-        path = resp['path']
-        if path == '':
-            return render_template('index.html', mensagem=resp['message'])
+        try:
+            path = resp['path']
+        except KeyError:
+            flash('Arquivo é obrigatório', category='error')
+            return render_template('upload_form.html')
+            #return render_template('index.html', mensagem=resp['message'])
         # Validar se os campos checkbox estão marcados
         msgStartups = None
         msgKpis = None
@@ -62,6 +66,25 @@ def data_load():
                 flash(msgStartups, category='error')
         return render_template('upload_form.html')
 
+@app.route('/upload-projetos', methods=['POST'])
+def upload_projetos():
+    if request.method == 'POST':
+        resp = validateFileReq(request)
+        try:
+            path = resp['path']
+        except KeyError:
+            flash('Arquivo é obrigatório', category='error')
+            return render_template('upload_form.html')
+
+        msgProjetos = projetosToDB(path)
+    
+        if msgProjetos == 'OK':
+            flash('Dados dos Indicadores carregados com sucesso.',
+                    category='success')
+        else:
+            flash(msgProjetos, category='error')
+
+        return render_template('upload_form.html')
 
 @app.route('/dashboard', methods=['POST'])
 def upload_file():
@@ -94,4 +117,4 @@ def upload_file():
 
 
 if __name__ == "__main__":
-    app.run(port=33507)
+    app.run(debug=True,port=33507)
