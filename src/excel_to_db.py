@@ -31,14 +31,17 @@ def startupsToDB(path):
     try:
         metadadosFiltradoDF = metadadosDF.iloc[:, 0:3]
         metadadosFiltradoDF.rename(columns={
-                                   'ID': 'id', 'Nome Resumido': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
+                                   'Unnamed: 0': 'id', 'Unnamed: 1': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
     except Exception:
-        return 'Problemas ao converter dados da Aba Apoio-Metadados'
+        return 'Problemas ao converter dados da Aba Apoio-Metadados, verifique se não houve mudança na estrutura da planilha.'
     # Consolidar informações em um único dataframe
-    startupsConsolidadoDF = metadadosFiltradoDF.merge(
-        startupsDF, on='nome_projeto', how='left')
-    startupsConsolidadoDF.fillna({'orgao': 'N/D', 'relato': 'N/D',
-                                  'pontos_atencao': 'N/D', 'ultima_atualizacao': '', 'status': 'Pactuação'}, inplace=True)
+    try:
+        startupsConsolidadoDF = metadadosFiltradoDF.merge(
+            startupsDF, on='nome_projeto', how='left')
+        startupsConsolidadoDF.fillna({'orgao': 'N/D', 'relato': 'N/D',
+                                      'pontos_atencao': 'N/D', 'ultima_atualizacao': '', 'status': 'Pactuação'}, inplace=True)
+    except Exception:
+        return 'Problemas ao consolidar abas Apoio-Projetos e Apoio-Metadados, deve haver algo de errado na estrutura das planilhas.'
     # Enviar dados tratados para o GBQ
     try:
         startupsConsolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.startups',
