@@ -41,7 +41,7 @@ def startupsToDB(path):
         startupsConsolidadoDF.fillna({'orgao': 'N/D', 'relato': 'N/D',
                                       'pontos_atencao': 'N/D', 'ultima_atualizacao': '', 'status': 'Pactuação'}, inplace=True)
     except Exception:
-        return 'Problemas ao consolidar abas Apoio-Projetos e Apoio-Metadados, deve haver algo de errado na estrutura das planilhas.'
+        return 'Problemas ao consolidar abas Apoio-Projetos e Apoio-Metadados, verificar se não houve alterações no layout das planilhas'
     # Enviar dados tratados para o GBQ
     try:
         startupsConsolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.startups',
@@ -205,13 +205,15 @@ def kpisToDB(path):
     # Limpar a tabela de METADADOS tirando o que não é útil
     metadadosFiltradoDF = metadadosDF.iloc[:, 0:3]
     metadadosFiltradoDF.rename(columns={
-                               'ID': 'id', 'Nome Resumido': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
-
-    consolidadoDF = kpisConsolidados.merge(
-        metadadosFiltradoDF, on="nome_projeto", how="left")
-    columns_order = ['id', 'nome_projeto', 'nome_resumido', 'tipo_kpi',
-                     'kpi', 'periodo', 'previsto', 'realizado', 'calculado', 'farol']
-    consolidadoDF = consolidadoDF.reindex(columns=columns_order)
+                               'Unnamed: 0': 'id', 'Unnamed: 1': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
+    try:
+        consolidadoDF = kpisConsolidados.merge(
+            metadadosFiltradoDF, on="nome_projeto", how="left")
+        columns_order = ['id', 'nome_projeto', 'nome_resumido', 'tipo_kpi',
+                         'kpi', 'periodo', 'previsto', 'realizado', 'calculado', 'farol']
+        consolidadoDF = consolidadoDF.reindex(columns=columns_order)
+    except Exception:
+        return 'Problemas ao consolidar abas 06-Apoio-KPIs consolidados e Apoio-Metadados, verificar se não houve alterações no layout das planilhas'
 
     # Enviar dados tratados para o GBQ
     try:
