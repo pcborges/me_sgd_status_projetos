@@ -166,15 +166,15 @@ def kpisToDB(path):
 
                 try:
                     if linha[realizado] == 0 or linha[realizado] == None:
-                        farol = 1  # CINZA
+                        farol = 4  # CINZA
                     elif ((linha[realizado] * 100) / linha[previsto]) >= 80:
-                        farol = 4  # VERDE
+                        farol = 3  # VERDE
                     elif (((linha[realizado] * 100) / linha[previsto]) >= 60) & (((linha[realizado] * 100) / linha[previsto]) < 80):
-                        farol = 3  # AMARELO
+                        farol = 2  # AMARELO
                     else:
-                        farol = 2  # VERMELHO
+                        farol = 1  # VERMELHO
                 except ZeroDivisionError:
-                    farol = 1  # CINZA
+                    farol = 4  # CINZA
 
                 try:
                     calculado = linha[realizado] / linha[previsto]
