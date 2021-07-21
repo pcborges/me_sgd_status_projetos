@@ -270,10 +270,11 @@ def projetosToDB(path):
     # Importar dados da planilha na aba KPI's
     print('CARGA_PROJETOS_INICIO')
     start_time = time.time()
+    nomeAba = '03 - GP CGPE'
     try:
-        projetosDF = pd.read_excel(path, sheet_name='03 - GP CGPE', header=2)
+        projetosDF = pd.read_excel(path, sheet_name=nomeAba, header=2)
     except Exception:
-        return 'Aba 03 - GP CGPE não encontrada, verifique se o arquivo enviado está no padrão esperado.'
+        return f'Aba {nomeAba} não encontrada, verifique se o arquivo enviado está no padrão esperado.'
 
     newColumnsNames = {
         "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_squad", "Email": "email_lider",
@@ -288,6 +289,10 @@ def projetosToDB(path):
         projetosDF.fillna('N/D', inplace=True)
     except Exception:
         return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
+
+    # Verificar duplicidade de projetos
+    if len(projetosDF['nome_projeto'].unique()) < len(projetosDF.index):
+        return f'Aba {nomeAba} tem projetos com mesmo nome, favor verificar.'
 
     # Enviar dados tratados para o GBQ
     try:
