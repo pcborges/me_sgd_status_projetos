@@ -280,6 +280,8 @@ def projetosToDB(path):
         projetosDF = pd.read_excel(path, sheet_name=nomeAba, header=2)
     except Exception:
         return f'Aba {nomeAba} não encontrada, verifique se o arquivo enviado está no padrão esperado.'
+    filtroColunas = ['ÓRGÃO', 'Projeto', 'Resumo', 'Startup', 'Líder do Projeto', 'Email',
+                     'Telefone', 'Titular CGPE', 'Substituto CGPE ', 'Status', 'SITUAÇÃO', 'Observação']
 
     newColumnsNames = {
         "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_squad", "Email": "email_lider",
@@ -288,8 +290,7 @@ def projetosToDB(path):
     }
     # Enviar dados tratados para o GBQ
     try:
-        projetosDF.drop(columns=projetosDF.columns[[
-                        0, 3, 10, 11, 12, 14]], inplace=True)
+        projetosDF = projetosDF.loc[:, filtroColunas]
         projetosDF.rename(columns=newColumnsNames, inplace=True)
         projetosDF.fillna('N/D', inplace=True)
         projetosDF['nome_projeto'] = projetosDF['nome_projeto'].str.strip()
