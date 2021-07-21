@@ -33,6 +33,11 @@ def alocacoesToDB(path):
         }
 
         alocacaoDF.rename(columns=colunas, inplace=True)
+        # Remover espaços de strings
+        alocacaoDF['nome_projeto'] = alocacaoDF['nome_projeto'].str.strip()
+        alocacaoDF['perfil'] = alocacaoDF['perfil'].str.strip()
+        alocacaoDF['cidade'] = alocacaoDF['cidade'].str.strip()
+        alocacaoDF['uf'] = alocacaoDF['uf'].str.strip()
 
     except Exception:
         return 'Problemas ao efetuar tratamentos da aba 02-Alocação, verifique se houveram mudanças na estrutura de colunas da planilha.'
@@ -287,6 +292,7 @@ def projetosToDB(path):
                         0, 3, 10, 11, 12, 14]], inplace=True)
         projetosDF.rename(columns=newColumnsNames, inplace=True)
         projetosDF.fillna('N/D', inplace=True)
+        projetosDF['nome_projeto'] = projetosDF['nome_projeto'].str.strip()
     except Exception:
         return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
 
