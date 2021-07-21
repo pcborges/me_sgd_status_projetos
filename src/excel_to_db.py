@@ -43,6 +43,8 @@ def alocacoesToDB(path):
     except Exception:
         return 'Erro ao salvar dados convertidos de Alocacao para o BigQuery'
 
+    return 'OK'
+
 
 def startupsToDB(path):
     # Importar dados da planilha na aba KPI's
@@ -274,14 +276,14 @@ def projetosToDB(path):
         return 'Aba 03 - GP CGPE não encontrada, verifique se o arquivo enviado está no padrão esperado.'
 
     newColumnsNames = {
-        "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_projeto", "Email": "email_lider",
+        "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_squad", "Email": "email_lider",
         "Telefone": "telefone_lider", "Titular CGPE": "titular_cgpe", "Substituto CGPE ": "substituto_cgpe", "Status": "status",
-        "Situação": "situacao", "Observação": "observacao"
+        "SITUAÇÃO": "situacao", "Observação": "observacao"
     }
     # Enviar dados tratados para o GBQ
     try:
         projetosDF.drop(columns=projetosDF.columns[[
-                        0, 3, 10, 11, 13]], inplace=True)
+                        0, 3, 10, 11, 12, 14]], inplace=True)
         projetosDF.rename(columns=newColumnsNames, inplace=True)
         projetosDF.fillna('N/D', inplace=True)
     except Exception:
@@ -291,7 +293,8 @@ def projetosToDB(path):
     try:
         projetosDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.projetos',
                           if_exists='replace', project_id='sgdgovbr')
-    except Exception:
+    except Exception as e:
+        print(e)
         return 'Erro ao salvar dados convertidos de Projetos para o BigQuery'
 
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
