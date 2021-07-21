@@ -269,18 +269,19 @@ def projetosToDB(path):
     print('CARGA_PROJETOS_INICIO')
     start_time = time.time()
     try:
-        projetosDF = pd.read_excel(path, sheet_name='01-Projetos')
+        projetosDF = pd.read_excel(path, sheet_name='03 - GP CGPE', header=2)
     except Exception:
-        return 'Aba 01-Projetos não encontrada, verifique se o arquivo enviado está no padrão esperado.'
+        return 'Aba 03 - GP CGPE não encontrada, verifique se o arquivo enviado está no padrão esperado.'
 
-    newColumnsNames = {'Orgão': 'orgao',	'Sigla Orgão': 'sigla_orgao', 	'Nome do projeto': 'nome_projeto',	'Escopo do Projeto': 'escopo_projeto', 	'Números do Projeto': 'numeros_projeto', 	'Recomendação de Implantação': 'recomendacao_implantacao', 	'Motivo Recomendação': 'motivo_recomendacao', 	'Status do Projeto': 'status_projeto', 	'Fase': 'fase_projeto',
-                       'Substituto': 'lider_substituto', 	'Líder no Órgão': 'lider_orgao', 	'Líder do SQUAD': 'lider_squad', 	'Gestão': 'qtd_gestao', 'Equipe SGD': 'qtd_equipe_sgd',	'Temporários': 'qtd_temporarios',	'Pessoas Alocadas': 'qtd_pessoas_alocadas', 	'Nível de Risco': 'nivel_risco_projeto', 	'Pontos de Atenção': 'pontos_atencao', 	'Relato': 'relato',	'Processo SEI': 'processo_sei'}
+    newColumnsNames = {
+        "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_projeto", "Email": "email_lider",
+        "Telefone": "telefone_lider", "Titular CGPE": "titular_cgpe", "Substituto CGPE ": "substituto_cgpe", "Status": "status", "Observação": "observacao"
+    }
     # Enviar dados tratados para o GBQ
     try:
-        projetosDF = projetosDF.iloc[0:, 1:20]
+        projetosDF.drop(columns=projetosDF.columns[[
+                        0, 3, 10, 11, 13]], inplace=True)
         projetosDF.rename(columns=newColumnsNames, inplace=True)
-        projetosDF.fillna({'qtd_gestao': 0,	'qtd_equipe_sgd': 0,
-                          'qtd_temporarios': 0}, inplace=True)
         projetosDF.fillna('N/D', inplace=True)
     except Exception:
         return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
