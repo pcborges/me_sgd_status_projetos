@@ -7,6 +7,43 @@ credentials = service_account.Credentials.from_service_account_file(
     'google-credentials.json')
 
 
+def alocacoesToDB(path):
+    try:
+        alocacaoDF = pd.read_excel(path,
+                                   sheet_name='02-Alocação')
+    except Exception:
+        return 'Aba 02-Alocação não encontrada, verifique se não houveram mudanças na estrutura da planilha'
+
+    try:
+        alocacaoDF = alocacaoDF.iloc[0:, 0:12]
+        alocacaoDF.fillna('N/D', inplace=True)
+        colunas = {
+            "PROJETO": "nome_projeto",
+            "ORGÃO": "sigla_orgao",
+            "PERFIL": "perfil",
+            "ORIGEM": "origem",
+            "NOME": "nome",
+            "OBS": "observacao",
+            "Situação": "situacao",
+            "CIDADE": "cidade",
+            "UF": "uf",
+            "Nº PROCESSO SEI ACT": "processo_sei",
+            "PUBLICACAO EXTRATO": "publicacao_extrato",
+            "PORTARIA DE PESSOAL": "portaria_de_pessoal"
+        }
+
+        alocacaoDF.rename(columns=colunas, inplace=True)
+
+    except Exception:
+        return 'Problemas ao efetuar tratamentos da aba 02-Alocação, verifique se houveram mudanças na estrutura de colunas da planilha.'
+
+    try:
+        alocacaoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.alocacao',
+                          if_exists='replace', project_id='sgdgovbr')
+    except Exception:
+        return 'Erro ao salvar dados convertidos de Alocacao para o BigQuery'
+
+
 def startupsToDB(path):
     # Importar dados da planilha na aba KPI's
     print('CARGA_STARTUPS_INICIO')

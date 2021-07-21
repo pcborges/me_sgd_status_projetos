@@ -1,7 +1,7 @@
 import os
 from flask import Flask,  request,  render_template, flash
 from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML, getTotaisProjetosPriorizados
-from src.excel_to_db import kpisToDB, startupsToDB, projetosToDB
+from src.excel_to_db import kpisToDB, startupsToDB, projetosToDB, alocacoesToDB
 from src.utils import validateFileReq
 import config
 
@@ -79,10 +79,31 @@ def upload_projetos():
         msgProjetos = projetosToDB(path)
 
         if msgProjetos == 'OK':
-            flash('Dados dos Indicadores carregados com sucesso.',
+            flash('Dados dos Projetos carregados com sucesso.',
                   category='success')
         else:
             flash(msgProjetos, category='error')
+
+        return render_template('upload_form.html')
+
+
+@app.route('/upload-alocacoes', methods=['POST'])
+def upload_alocacoes():
+    if request.method == 'POST':
+        resp = validateFileReq(request)
+        try:
+            path = resp['path']
+        except KeyError:
+            flash('Arquivo é obrigatório', category='error')
+            return render_template('upload_form.html')
+
+        msgAlocacoes = alocacoesToDB(path)
+
+        if msgAlocacoes == 'OK':
+            flash('Dados das Alocações carregadas com sucesso.',
+                  category='success')
+        else:
+            flash(msgAlocacoes, category='error')
 
         return render_template('upload_form.html')
 
