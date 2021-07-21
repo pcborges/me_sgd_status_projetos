@@ -275,7 +275,8 @@ def projetosToDB(path):
 
     newColumnsNames = {
         "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_projeto", "Email": "email_lider",
-        "Telefone": "telefone_lider", "Titular CGPE": "titular_cgpe", "Substituto CGPE ": "substituto_cgpe", "Status": "status", "Observação": "observacao"
+        "Telefone": "telefone_lider", "Titular CGPE": "titular_cgpe", "Substituto CGPE ": "substituto_cgpe", "Status": "status",
+        "Situação": "situacao", "Observação": "observacao"
     }
     # Enviar dados tratados para o GBQ
     try:
