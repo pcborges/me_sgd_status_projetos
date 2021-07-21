@@ -6,6 +6,7 @@ from src.utils import validateFileReq
 import config
 
 UPLOAD_FOLDER = os.getcwd() + 'upload'
+SENHA_UPLOAD = os.environ['SENHA_UPLOAD']
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER

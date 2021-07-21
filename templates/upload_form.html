@@ -17,11 +17,13 @@ Upload
         <div class="accordion-body">
           <form id="indicadoresForm" action="/upload-indicadores" method="POST" enctype="multipart/form-data">
             <div class="mb-3">
+              <label for="fileIndicadores" class="form-label">Planilha de Faróis</label>
               <input type="file" name="file" class="form-control" id="fileIndicadores"
                 aria-describedby="fileIndicadores" aria-label="Upload">
               <div class="form-text">Apenas arquivos Excel, no formato padrão da SGD serão aceitos.
               </div>
             </div>
+
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" id="carga_startups" name="carga_startups" checked>
               <label class="form-check-label" for="carga_startups">Carregar Dados das Startups</label>
