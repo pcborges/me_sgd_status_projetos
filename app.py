@@ -36,6 +36,11 @@ def dashboard():
 @app.route('/upload-indicadores', methods=['POST'])
 def upload_indicadores():
     if request.method == 'POST':
+        print(request.form.get("senha"))
+        if request.form.get('senha') != SENHA_UPLOAD:
+            flash(
+                'Senha inválida, não será possível carregar os Dados dos Indicadores.', category='error')
+            return render_template('upload_form.html')
         resp = validateFileReq(request)
         try:
             path = resp['path']
@@ -70,6 +75,11 @@ def upload_indicadores():
 @app.route('/upload-projetos', methods=['POST'])
 def upload_projetos():
     if request.method == 'POST':
+        if request.form.get('senha') != SENHA_UPLOAD:
+            flash(
+                'Senha inválida, não será possível carregar os Dados dos Projetos.', category='error')
+            return render_template('upload_form.html')
+
         resp = validateFileReq(request)
         try:
             path = resp['path']
@@ -91,6 +101,11 @@ def upload_projetos():
 @app.route('/upload-alocacoes', methods=['POST'])
 def upload_alocacoes():
     if request.method == 'POST':
+        if request.form.get('senha') != SENHA_UPLOAD:
+            flash(
+                'Senha inválida, não será possível carregar os Dados de Alocação dos Servidores.', category='error')
+            return render_template('upload_form.html')
+
         resp = validateFileReq(request)
         try:
             path = resp['path']
