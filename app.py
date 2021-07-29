@@ -1,7 +1,7 @@
 import os
 from flask import Flask,  request,  render_template, flash
 from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML, getTotaisProjetosPriorizados
-from src.excel_to_db import kpisToDB, startupsToDB, projetosToDB, alocacoesToDB
+from src.excel_to_db import kpisToDB, relatoPontosAtencaoToDB, projetosToDB, alocacoesToDB
 from src.utils import validateFileReq
 import config
 
@@ -52,7 +52,7 @@ def upload_indicadores():
         msgStartups = None
         msgKpis = None
         if request.form.get('carga_startups'):
-            msgStartups = startupsToDB(path)
+            msgStartups = relatoPontosAtencaoToDB(path)
         if request.form.get('carga_kpis'):
             msgKpis = kpisToDB(path)
 
