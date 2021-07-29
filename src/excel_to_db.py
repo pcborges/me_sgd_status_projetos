@@ -54,7 +54,7 @@ def alocacoesToDB(path):
     return 'OK'
 
 
-def startupsToDB(path):
+def relatoPontosAtencaoToDB(path):
     # Importar dados da planilha na aba KPI's
     print('CARGA_STARTUPS_INICIO')
     start_time = time.time()
