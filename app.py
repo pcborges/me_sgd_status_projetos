@@ -61,11 +61,11 @@ def upload_indicadores():
                 flash('Dados dos Indicadores carregados com sucesso.',
                       category='success')
             else:
-                flash(msgKpis, category='error')
+                flash(f'{msgKpis}', category='error')
 
         if not msgStartups == None:
             if msgStartups == 'OK':
-                flash('Dados das Startups carregados com sucesso.',
+                flash('Dados de Relato e Pontos de Atenção carregados com sucesso.',
                       category='success')
             else:
                 flash(msgStartups, category='error')
