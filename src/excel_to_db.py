@@ -2,9 +2,12 @@ import pandas as pd
 import time
 from google.oauth2 import service_account
 from datetime import datetime
+import pandas_gbq as gbq
 
 credentials = service_account.Credentials.from_service_account_file(
     'google-credentials.json')
+
+gbq.context.credentials = credentials
 
 
 def alocacoesToDB(path):
@@ -104,8 +107,8 @@ def kpisToDB(path):
     try:
         kpisDF = pd.read_excel(path,
                                sheet_name='06-Apoio-KPIs consolidados', header=1)
-        metadadosDF = pd.read_excel(
-            path, sheet_name='Apoio-Metadados', header=1)
+        # metadadosDF = pd.read_excel(
+        #     path, sheet_name='Apoio-Metadados', header=1)
     except Exception:
         return 'Aba 06-Apoio-KPIs consolidados ou Apoio-Metadados não encontrada'
 
@@ -246,25 +249,42 @@ def kpisToDB(path):
     # remover espaços do inicio da descrição dos KPI's
     kpisConsolidados['kpi'].replace(
         ['^\s', '\n'], value='', regex=True, inplace=True)
-    # Limpar a tabela de METADADOS tirando o que não é útil
-    metadadosFiltradoDF = metadadosDF.iloc[:, 0:3]
-    metadadosFiltradoDF.rename(columns={
-                               'Unnamed: 0': 'id', 'Unnamed: 1': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
+    # Criar campo chave para comparar o meger com a tabela de projetos
+    kpisConsolidados['chave'] = kpisConsolidados['nome_projeto'].str.lower()
+    try:
+        # Carregar tabela de projetos do Bigquery para fazer validacoes
+        query = 'SELECT nome_projeto, Startup as nome_resumido FROM `sgdgovbr.projetos_sgd.projetos`'
+        projetosGBQDF = gbq.read_gbq(
+            query, project_id='sgdgovbr', progress_bar_type=None)
+        # Criar campo chave de pesquisa (nome_projeto com caracteres minusculos)
+        projetosGBQDF['chave'] = projetosGBQDF['nome_projeto'].str.lower()
+        projetosGBQDF = projetosGBQDF.drop(['nome_projeto'],  axis='columns')
+    except Exception as e:
+        return f'Erro ao recuperar dados do Banco de Dados: {e}'
+
     try:
         consolidadoDF = kpisConsolidados.merge(
-            metadadosFiltradoDF, on="nome_projeto", how="left")
-        columns_order = ['id', 'nome_projeto', 'nome_resumido', 'tipo_kpi',
+            projetosGBQDF, on="chave", how="left")
+        columns_order = ['nome_projeto', 'nome_resumido', 'tipo_kpi',
                          'kpi', 'periodo', 'previsto', 'realizado', 'calculado', 'farol']
         consolidadoDF = consolidadoDF.reindex(columns=columns_order)
     except Exception:
-        return 'Problemas ao consolidar abas 06-Apoio-KPIs consolidados e Apoio-Metadados, verificar se não houve alterações no layout das planilhas'
+        return 'Problemas ao consolidar dados de KPIs com dados dos Projetos no Banco de Dados'
 
-    # Enviar dados tratados para o GBQ
     try:
-        consolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
-                             if_exists='replace', project_id='sgdgovbr')
-    except Exception:
-        return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
+        projetosNulos = consolidadoDF.loc[consolidadoDF['nome_resumido'].isnull(
+        )]
+        if not projetosNulos.empty:
+            listaProjetosDiferentes = projetosNulos['nome_projeto'].unique()
+            return f'Verificar se o Nome do Projeto da aba 06-KPIs é exatamente igual ao nome cadastrado na planilha INPUT - Lista de projetos com problemas: {listaProjetosDiferentes} '
+    except Exception as e:
+        return f'Erro ao buscar projetos que existem na planilha de Kpis e não existem na tabela de projetos'
+    # Enviar dados tratados para o GBQ
+    # try:
+    #     consolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
+    #                          if_exists='replace', project_id='sgdgovbr')
+    # except Exception:
+    #     return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
 
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
     print('CARGA_KPIS_FIM')
