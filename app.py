@@ -3,10 +3,10 @@ from flask import Flask,  request,  render_template, flash
 from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML, getTotaisProjetosPriorizados
 from src.excel_to_db import kpisToDB, relatoPontosAtencaoToDB, projetosToDB, alocacoesToDB
 from src.utils import validateFileReq
-import config
+from config import getUploadPass
 
 UPLOAD_FOLDER = os.getcwd() + 'upload'
-SENHA_UPLOAD = os.environ['SENHA_UPLOAD']
+SENHA_UPLOAD = getUploadPass()
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
