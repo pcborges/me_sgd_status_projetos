@@ -1,8 +1,13 @@
+from config import getDBConnectionString
 import pandas as pd
 import time
 from google.oauth2 import service_account
 from datetime import datetime
 import pandas_gbq as gbq
+from sqlalchemy import create_engine
+from config import getDBConnectionString
+
+engine = create_engine(getDBConnectionString())
 
 credentials = service_account.Credentials.from_service_account_file(
     'google-credentials.json')
@@ -45,11 +50,17 @@ def alocacoesToDB(path):
     except Exception:
         return 'Problemas ao efetuar tratamentos da aba 02-Alocação, verifique se houveram mudanças na estrutura de colunas da planilha.'
 
+    # try:
+    #     alocacaoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.alocacao',
+    #                       if_exists='replace', project_id='sgdgovbr')
+    # except Exception:
+    #     return 'Erro ao salvar dados convertidos de Alocacao para o BigQuery'
+
     try:
-        alocacaoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.alocacao',
-                          if_exists='replace', project_id='sgdgovbr')
+        alocacaoDF.to_sql(name='alocacao', con=engine,
+                          if_exists='replace', index=True)
     except Exception:
-        return 'Erro ao salvar dados convertidos de Alocacao para o BigQuery'
+        return 'Erro ao salvar dados convertidos de Alocacao para o MySQL'
 
     return 'OK'
 
@@ -61,10 +72,8 @@ def relatoPontosAtencaoToDB(path):
     try:
         startupsDF = pd.read_excel(path,
                                    sheet_name='Apoio-Projetos')
-        metadadosDF = pd.read_excel(
-            path, sheet_name='Apoio-Metadados', header=1)
     except Exception:
-        return 'Aba de Apoio-Projetos ou Apoio-Metadados não encontrada.'
+        return 'Aba de Apoio-Projetos não encontrada.'
     # tratar informações das Startups
     try:
         startupsDF.rename(columns={'Area/Projeto': 'nome_projeto', 'Orgao': 'orgao', 'Status': 'status', 'Relato': 'relato',
@@ -76,14 +85,14 @@ def relatoPontosAtencaoToDB(path):
         return 'Problemas ao converter dados da Aba Apoio-Projetos'
     # tratar informações da aba de metadados
     try:
-        metadadosFiltradoDF = metadadosDF.iloc[:, 0:3]
-        metadadosFiltradoDF.rename(columns={
-                                   'Unnamed: 0': 'id', 'Unnamed: 1': 'nome_resumido', 'Unnamed: 2': 'nome_projeto'}, inplace=True)
+        query = 'SELECT nome_projeto, Startup as nome_resumido FROM `sgdgovbr.projetos_sgd.projetos`'
+        projetosGBQDF = gbq.read_gbq(
+            query, project_id='sgdgovbr', progress_bar_type=None)
     except Exception:
-        return 'Problemas ao converter dados da Aba Apoio-Metadados, verifique se não houve mudança na estrutura da planilha.'
+        return 'Problemas ao buscar dados de projetos do banco de dados.'
     # Consolidar informações em um único dataframe
     try:
-        startupsConsolidadoDF = metadadosFiltradoDF.merge(
+        startupsConsolidadoDF = projetosGBQDF.merge(
             startupsDF, on='nome_projeto', how='left')
         startupsConsolidadoDF.fillna({'orgao': 'N/D', 'relato': 'N/D',
                                       'pontos_atencao': 'N/D', 'ultima_atualizacao': '', 'status': 'Pactuação'}, inplace=True)
@@ -286,6 +295,13 @@ def kpisToDB(path):
     # except Exception:
     #     return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
 
+    try:
+        consolidadoDF.to_sql(name='indicadores', con=engine,
+                             if_exists='replace', index=True)
+    except Exception as e:
+        print(e)
+        return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
+
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
     print('CARGA_KPIS_FIM')
     return 'OK'
@@ -297,7 +313,8 @@ def projetosToDB(path):
     start_time = time.time()
     nomeAba = '03 - GP CGPE'
     try:
-        projetosDF = pd.read_excel(path, sheet_name=nomeAba, header=2)
+        projetosDF = pd.read_excel(
+            path, sheet_name=nomeAba, header=2)
     except Exception:
         return f'Aba {nomeAba} não encontrada, verifique se o arquivo enviado está no padrão esperado.'
     filtroColunas = ['ÓRGÃO', 'Projeto', 'Resumo', 'Startup', 'Líder do Projeto', 'Email',
@@ -314,6 +331,7 @@ def projetosToDB(path):
         projetosDF.rename(columns=newColumnsNames, inplace=True)
         projetosDF.fillna('N/D', inplace=True)
         projetosDF['nome_projeto'] = projetosDF['nome_projeto'].str.strip()
+        projetosDF['resumo'] = projetosDF['resumo'].str.strip()
     except Exception:
         return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
 
@@ -322,12 +340,19 @@ def projetosToDB(path):
         return f'Aba {nomeAba} tem projetos com mesmo nome, favor verificar.'
 
     # Enviar dados tratados para o GBQ
+    # try:
+    #     projetosDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.projetos',
+    #                       if_exists='replace', project_id='sgdgovbr')
+    # except Exception as e:
+    #     print(e)
+    #     return 'Erro ao salvar dados convertidos de Projetos para o BigQuery'
+
     try:
-        projetosDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.projetos',
-                          if_exists='replace', project_id='sgdgovbr')
+        projetosDF.to_sql(name='projetos_py', con=engine,
+                          if_exists='replace', index=True)
     except Exception as e:
         print(e)
-        return 'Erro ao salvar dados convertidos de Projetos para o BigQuery'
+        return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
 
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
     print('CARGA_PROJETOS_FIM')
