@@ -1,10 +1,9 @@
-from config import getDBConnectionString
 import pandas as pd
 import time
 from google.oauth2 import service_account
 from datetime import datetime
 import pandas_gbq as gbq
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, update
 from config import getDBConnectionString
 
 engine = create_engine(getDBConnectionString())
@@ -23,10 +22,10 @@ def alocacoesToDB(path):
         return 'Aba 02-Alocação não encontrada, verifique se não houveram mudanças na estrutura da planilha'
 
     try:
-        alocacaoDF = alocacaoDF.iloc[0:, 0:12]
+        alocacaoDF = alocacaoDF.iloc[0:, 0:10]
         alocacaoDF.fillna('N/D', inplace=True)
         colunas = {
-            "PROJETO": "nome_projeto",
+            "PROJETO": "startup",
             "ORGÃO": "sigla_orgao",
             "PERFIL": "perfil",
             "ORIGEM": "origem",
@@ -35,19 +34,23 @@ def alocacoesToDB(path):
             "Situação": "situacao",
             "CIDADE": "cidade",
             "UF": "uf",
-            "Nº PROCESSO SEI ACT": "processo_sei",
-            "PUBLICACAO EXTRATO": "publicacao_extrato",
-            "PORTARIA DE PESSOAL": "portaria_de_pessoal"
         }
 
         alocacaoDF.rename(columns=colunas, inplace=True)
         # Remover espaços de strings
-        alocacaoDF['nome_projeto'] = alocacaoDF['nome_projeto'].str.strip()
+        alocacaoDF['startup'] = alocacaoDF['startup'].str.strip()
         alocacaoDF['perfil'] = alocacaoDF['perfil'].str.strip()
         alocacaoDF['cidade'] = alocacaoDF['cidade'].str.strip()
         alocacaoDF['uf'] = alocacaoDF['uf'].str.strip()
+        #
+        # Status 9 indica a visão mais atualizada da informação
+        alocacaoDF = alocacaoDF.assign(in_carga=9)
+        alocacaoDF = alocacaoDF.assign(dt_carga=datetime.now())
+        alocacaoDF.drop(['SIAPE'], axis='columns', inplace=True)
+        alocacaoDF.set_index('startup')
 
-    except Exception:
+    except Exception as err:
+        print(err)
         return 'Problemas ao efetuar tratamentos da aba 02-Alocação, verifique se houveram mudanças na estrutura de colunas da planilha.'
 
     # try:
@@ -55,11 +58,20 @@ def alocacoesToDB(path):
     #                       if_exists='replace', project_id='sgdgovbr')
     # except Exception:
     #     return 'Erro ao salvar dados convertidos de Alocacao para o BigQuery'
+    try:
+        # Efetuar exclusão lógica dos projetos, alterando o status para 0
+        with engine.connect() as conn:
+            conn.execute(
+                "update bd_cgpe.alocacoes set in_carga = 0 where in_carga = 9")
+    except Exception as err:
+        print("ERRO DE BANCO", err)
+        return 'Erro ao efetuar exclusão lógica dos registros de Alocações'
 
     try:
-        alocacaoDF.to_sql(name='alocacao', con=engine,
-                          if_exists='replace', index=True)
-    except Exception:
+        alocacaoDF.to_sql(name='alocacoes', con=engine,
+                          if_exists='append', index=False)
+    except Exception as err:
+        print("ERRO SQL", err)
         return 'Erro ao salvar dados convertidos de Alocacao para o MySQL'
 
     return 'OK'
@@ -323,7 +335,7 @@ def projetosToDB(path):
     newColumnsNames = {
         "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_squad", "Email": "email_lider",
         "Telefone": "telefone_lider", "Titular CGPE": "titular_cgpe", "Substituto CGPE ": "substituto_cgpe", "Status": "status",
-        "SITUAÇÃO": "situacao", "Observação": "observacao"
+        "SITUAÇÃO": "situacao", "Observação": "observacao", 'Startup': 'startup'
     }
     # Enviar dados tratados para o GBQ
     try:
@@ -332,6 +344,10 @@ def projetosToDB(path):
         projetosDF.fillna('N/D', inplace=True)
         projetosDF['nome_projeto'] = projetosDF['nome_projeto'].str.strip()
         projetosDF['resumo'] = projetosDF['resumo'].str.strip()
+        # Status 9 indica a visão mais atualizada da informação
+        projetosDF = projetosDF.assign(in_carga=9)
+        projetosDF = projetosDF.assign(dt_carga=datetime.now())
+        projetosDF.set_index('startup')
     except Exception:
         return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
 
@@ -346,12 +362,19 @@ def projetosToDB(path):
     # except Exception as e:
     #     print(e)
     #     return 'Erro ao salvar dados convertidos de Projetos para o BigQuery'
-
     try:
-        projetosDF.to_sql(name='projetos_py', con=engine,
-                          if_exists='replace', index=True)
-    except Exception as e:
-        print(e)
+        # Efetuar exclusão lógica dos projetos, alterando o status para 0
+        with engine.connect() as conn:
+            conn.execute(
+                "update bd_cgpe.projetos set in_carga = 0 where in_carga = 9")
+    except Exception as err:
+        print("ERRO DE BANCO", err)
+        return 'Erro ao efetuar exclusão lógica dos registros de Projetos'
+    try:
+        projetosDF.to_sql(name='projetos', con=engine,
+                          if_exists='append', index=False)
+    except Exception as err:
+        print(err)
         return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
 
     print('Tempo de execução: %s segundos' % (time.time() - start_time))
