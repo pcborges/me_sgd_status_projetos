@@ -36,7 +36,6 @@ def dashboard():
 @app.route('/upload-indicadores', methods=['POST'])
 def upload_indicadores():
     if request.method == 'POST':
-        print(request.form.get("senha"))
         if request.form.get('senha') != SENHA_UPLOAD:
             flash(
                 'Senha inválida, não será possível carregar os Dados dos Indicadores.', category='error')
