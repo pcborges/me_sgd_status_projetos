@@ -162,7 +162,7 @@ def kpisToDB(path):
             kpisDF[nomeColuna] = pd.to_numeric(
                 kpisDF[nomeColuna], errors='coerce')
     except Exception:
-        return 'Problemas ao tratar '
+        return 'Verificar se colunas de KPIs Previstos/Realizados existem apenas valores numéricos.'
 
     try:
         # Gerar o Dataframe sem as colunas desnecessárias e com o nome das colunas renomeados.
@@ -236,10 +236,15 @@ def kpisToDB(path):
         return 'Problemas ao converter colunas do excel, verificar nomes e estrutura da tabela.'
 
     # Recuperar os Kpis separados para salvar no banco
-    kpisConsolidados = pd.DataFrame(data=separarKPIs(kpisLimpoDF))
-    # remover espaços do inicio da descrição dos KPI's
-    kpisConsolidados['kpi'].replace(
-        ['^\s', '\n'], value='', regex=True, inplace=True)
+    try:
+        kpisConsolidados = pd.DataFrame(data=separarKPIs(kpisLimpoDF))
+        # remover espaços do inicio da descrição dos KPI's
+        kpisConsolidados['kpi'].replace(
+            ['^\s', '\n'], value='', regex=True, inplace=True)
+    except Exception as err:
+        print(err)
+        return 'Erro ao consolidar indicadores, verificar se não foi alterada a estrutura da tabela.'
+
     try:
         # Carregar tabela de projetos do DB para fazer validações
         query = 'SELECT id, startup FROM `projetos` where in_carga = 9'
