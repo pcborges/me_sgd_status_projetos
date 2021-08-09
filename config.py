@@ -2,7 +2,7 @@ import os
 
 
 def getUploadPass():
-    return os.environ.get('SENHA_UPLOAD')
+    return '1'  # os.environ.get('SENHA_UPLOAD')
 
 
 def getDBConnectionString():

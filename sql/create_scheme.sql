@@ -21,6 +21,7 @@ USE `bd_cgpe` ;
 -- Table `Projetos`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `projetos` (
+  `id` int NOT NULL,
   `startup` TEXT NOT NULL,
   `nome_projeto` TEXT NULL,
   `resumo` TEXT NULL,
@@ -42,6 +43,7 @@ ENGINE = InnoDB;
 -- Table `Indicadores`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `indicadores` (
+  `id` int NOT NULL,
   `startup` TEXT NOT NULL,
   `competencia` DATE NOT NULL,
   `tipo_kpi` TEXT NOT NULL,
@@ -77,8 +79,9 @@ ENGINE = InnoDB;
 -- Table `Relatos`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `relatos` (
+  `id` int NOT NULL,
   `startup` TEXT NOT NULL,
-  `ultima_atualizacao` DATETIME NOT NULL,
+  `ultima_atualizacao` DATETIME NULL,
   `relato` TEXT NULL,
   `pontos_atencao` TEXT NULL,
   `in_carga` INT(1) NOT NULL,
