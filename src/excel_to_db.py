@@ -6,6 +6,7 @@ import pandas_gbq as gbq
 from sqlalchemy import create_engine
 from config import getDBConnectionString
 from .db_utils import softDelete
+from .utils import separarKPIs
 
 engine = create_engine(getDBConnectionString())
 
@@ -234,87 +235,39 @@ def kpisToDB(path):
         print(err)
         return 'Problemas ao converter colunas do excel, verificar nomes e estrutura da tabela.'
 
-    # Salvar períodos dos indicadores em formato DateTime
-    periodoDate = ['01/01/21 10:00:00', '01/02/21 10:00:00', '01/03/21 10:00:00', '01/04/21 10:00:00', '01/05/21 10:00:00', '01/06/21 10:00:00',
-                   '01/07/21 10:00:00', '01/08/21 10:00:00', '01/09/21 10:00:00', '01/10/21 10:00:00', '01/11/21 10:00:00', '01/12/21 10:00:00', '01/01/22 10:00:00',
-                   '01/02/22 10:00:00', '01/03/22 10:00:00', '01/04/22 10:00:00', '01/05/22 10:00:00', '01/06/22 10:00:00', '01/07/22 10:00:00',
-                   '01/08/22 10:00:00', '01/09/22 10:00:00', '01/10/22 10:00:00', '01/11/22 10:00:00', '01/12/22 10:00:00']
-
-    # Funcao que calcula e separa os kpis por periodo e retorna um dicionário com os dados
-
-    def separarKPIs(dataframe):
-        data = []
-        for linha in dataframe.itertuples():
-            indice_periodo = 0
-            for i in range(7, 31):
-                previsto = i
-                realizado = i + 24
-                farol = 0
-
-                try:
-                    if linha[realizado] == 0 or linha[realizado] == None:
-                        farol = 4  # CINZA
-                    elif ((linha[realizado] * 100) / linha[previsto]) >= 80:
-                        farol = 3  # VERDE
-                    elif (((linha[realizado] * 100) / linha[previsto]) >= 60) & (((linha[realizado] * 100) / linha[previsto]) < 80):
-                        farol = 2  # AMARELO
-                    else:
-                        farol = 1  # VERMELHO
-                except ZeroDivisionError:
-                    farol = 4  # CINZA
-
-                try:
-                    calculado = linha[realizado] / linha[previsto]
-                except ZeroDivisionError:
-                    calculado = 0
-
-                date_time_obj = datetime.strptime(
-                    periodoDate[indice_periodo], '%d/%m/%y %H:%M:%S')
-
-                data.append({
-                    "id": linha.id,
-                    "nome_projeto": linha.nome_projeto,
-                    "tipo_kpi": linha.tipo_kpi,
-                    'kpi': linha.kpi,
-                    'periodo': date_time_obj,
-                    'previsto': linha[previsto],
-                    'realizado': linha[realizado],
-                    'calculado': calculado,
-                    'farol': farol
-                })
-                indice_periodo += 1
-
-        return data
+    # Recuperar os Kpis separados para salvar no banco
     kpisConsolidados = pd.DataFrame(data=separarKPIs(kpisLimpoDF))
     # remover espaços do inicio da descrição dos KPI's
     kpisConsolidados['kpi'].replace(
         ['^\s', '\n'], value='', regex=True, inplace=True)
     try:
-        # Carregar tabela de projetos do Bigquery para fazer validacoes
-        query = 'SELECT nome_projeto, Startup as nome_resumido FROM `sgdgovbr.projetos_sgd.projetos`'
-        projetosGBQDF = gbq.read_gbq(
-            query, project_id='sgdgovbr', progress_bar_type=None)
-        # Criar campo chave de pesquisa (nome_projeto com caracteres minusculos)
-        projetosGBQDF['chave'] = projetosGBQDF['nome_projeto'].str.lower()
-        projetosGBQDF = projetosGBQDF.drop(['nome_projeto'],  axis='columns')
+        # Carregar tabela de projetos do DB para fazer validações
+        query = 'SELECT id, startup FROM `projetos` where in_carga = 9'
+        projetosDF = pd.read_sql(
+            query, con=engine)
     except Exception as e:
         return f'Erro ao recuperar dados do Banco de Dados: {e}'
 
     try:
         consolidadoDF = kpisConsolidados.merge(
-            projetosGBQDF, on="chave", how="left")
-        columns_order = ['nome_projeto', 'nome_resumido', 'tipo_kpi',
-                         'kpi', 'periodo', 'previsto', 'realizado', 'calculado', 'farol']
+            projetosDF, on="id", how="left")
+        columns_order = ['id', 'startup', 'nome_projeto', 'tipo_kpi',
+                         'kpi', 'competencia', 'previsto', 'realizado', 'calculado', 'farol']
         consolidadoDF = consolidadoDF.reindex(columns=columns_order)
+        # Status 9 indica a visão mais atualizada da informação
+        consolidadoDF.drop(['nome_projeto'], axis='columns', inplace=True)
+        consolidadoDF = consolidadoDF.assign(in_carga=9)
+        consolidadoDF = consolidadoDF.assign(dt_carga=datetime.now())
+        consolidadoDF.set_index('id')
     except Exception:
         return 'Problemas ao consolidar dados de KPIs com dados dos Projetos no Banco de Dados'
 
     try:
-        projetosNulos = consolidadoDF.loc[consolidadoDF['nome_resumido'].isnull(
+        projetosNulos = consolidadoDF.loc[consolidadoDF['startup'].isnull(
         )]
         if not projetosNulos.empty:
-            listaProjetosDiferentes = projetosNulos['nome_projeto'].unique()
-            return f'Verificar se o Nome do Projeto da aba 06-KPIs é exatamente igual ao nome cadastrado na planilha INPUT - Lista de projetos com problemas: {listaProjetosDiferentes} '
+            listaProjetosDiferentes = projetosNulos['id'].unique()
+            return f'Existem Projetos na Aba KPIs que não estão no DB de Projetos, IDs: {listaProjetosDiferentes} '
     except Exception as e:
         return f'Erro ao buscar projetos que existem na planilha de Kpis e não existem na tabela de projetos'
     # Enviar dados tratados para o GBQ
@@ -323,10 +276,15 @@ def kpisToDB(path):
     #                          if_exists='replace', project_id='sgdgovbr')
     # except Exception:
     #     return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
+    try:
+        softDelete(engine, 'indicadores')
+    except Exception as err:
+        print("ERRO DE BANCO", err)
+        return 'Erro ao efetuar exclusão lógica dos registros de Indicadores'
 
     try:
         consolidadoDF.to_sql(name='indicadores', con=engine,
-                             if_exists='replace', index=True)
+                             if_exists='append', index=False)
     except Exception as e:
         print(e)
         return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
