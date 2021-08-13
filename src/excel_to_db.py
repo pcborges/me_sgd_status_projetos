@@ -76,15 +76,14 @@ def relatoPontosAtencaoToDB(path):
             ['^\s', '\t', '\n', '\r', '_x([0-9a-fA-F]{4})_'], value=' ', regex=True, inplace=True)
 
     except Exception as err:
-        return 'Problemas ao converter dados da Aba Apoio-Projetos'
+        return f'Problemas ao converter dados da Aba Apoio-Projetos: {err}'
     # Recuperar projetos do DB para fazer validacoes
     try:
         query = 'SELECT id, startup FROM `projetos` where in_carga = 9'
         projetosDF = pd.read_sql(
             query, con=engine)
     except Exception as err:
-        print(err)
-        return 'Problemas ao buscar dados de projetos do banco de dados.'
+        return f'Problemas ao buscar dados de projetos do banco de dados: {err}'
     # Consolidar informações em um único dataframe
     try:
         projetosRelatosDF = relatosDF.merge(
@@ -95,26 +94,23 @@ def relatoPontosAtencaoToDB(path):
         projetosRelatosDF = projetosRelatosDF.assign(dt_carga=datetime.now())
         projetosRelatosDF.set_index('id')
     except Exception as err:
-        print(err)
-        return 'Problemas ao relacionar pontos de atenção e relatos aos projetos, verificar se existe ID na aba Apoio-Projetos'
+        return f'Problemas ao relacionar pontos de atenção e relatos aos projetos: {err}'
     try:
         softDelete(engine, 'relatos')
     except Exception as err:
-        print("ERRO DE BANCO", err)
-        return 'Erro ao efetuar exclusão lógica dos registros de Relatos'
+
+        return f'Erro ao efetuar exclusão lógica dos registros de Relatos: {err}'
 
     try:
         projetosRelatosDF.to_sql(name='relatos', con=engine,
                                  if_exists='append', index=False)
     except Exception as err:
-        print(err)
-        return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
+        return f'Erro ao salvar dados convertidos de Relatos para o MySQL: {err}'
 
     return 'OK'
 
 
 def kpisToDB(path):
-    print("CARGA INDICADORES")
     # Importar dados da planilha na aba KPI's
     try:
         kpisDF = pd.read_excel(path,
@@ -128,8 +124,8 @@ def kpisToDB(path):
             nomeColuna = kpisDF.columns[x]
             kpisDF[nomeColuna] = pd.to_numeric(
                 kpisDF[nomeColuna], errors='coerce')
-    except Exception:
-        return 'Verificar se colunas de KPIs Previstos/Realizados existem apenas valores numéricos.'
+    except Exception as err:
+        return f'Verificar se colunas de KPIs Previstos/Realizados existem apenas valores numéricos: {err}'
 
     try:
         # Gerar o Dataframe sem as colunas desnecessárias e com o nome das colunas renomeados.
@@ -199,8 +195,7 @@ def kpisToDB(path):
         kpisLimpoDF.drop(kpisLimpoDF[kpisLimpoDF['nome_projeto']
                          == 'Indicadores Consolidados'].index, inplace=True)
     except Exception as err:
-        print(err)
-        return 'Problemas ao converter colunas do excel, verificar nomes e estrutura da tabela.'
+        return f'Problemas ao converter colunas do excel, verificar nomes e estrutura da tabela: {err}'
 
     # Recuperar os Kpis separados para salvar no banco
     try:
@@ -209,16 +204,15 @@ def kpisToDB(path):
         kpisConsolidados['kpi'].replace(
             ['^\s', '\n'], value='', regex=True, inplace=True)
     except Exception as err:
-        print(err)
-        return 'Erro ao consolidar indicadores, verificar se não foi alterada a estrutura da tabela.'
+        return f'Erro ao consolidar indicadores, verificar se não foi alterada a estrutura da tabela: {err}'
 
     try:
         # Carregar tabela de projetos do DB para fazer validações
         query = 'SELECT id, startup FROM `projetos` where in_carga = 9'
         projetosDF = pd.read_sql(
             query, con=engine)
-    except Exception as e:
-        return f'Erro ao recuperar dados do Banco de Dados: {e}'
+    except Exception as err:
+        return f'Erro ao recuperar dados do Banco de Dados: {err}'
 
     try:
         consolidadoDF = kpisConsolidados.merge(
@@ -231,8 +225,8 @@ def kpisToDB(path):
         consolidadoDF = consolidadoDF.assign(in_carga=9)
         consolidadoDF = consolidadoDF.assign(dt_carga=datetime.now())
         consolidadoDF.set_index('id')
-    except Exception:
-        return 'Problemas ao consolidar dados de KPIs com dados dos Projetos no Banco de Dados'
+    except Exception as err:
+        return f'Problemas ao consolidar dados de KPIs: {err}'
 
     try:
         projetosNulos = consolidadoDF.loc[consolidadoDF['startup'].isnull(
@@ -240,27 +234,24 @@ def kpisToDB(path):
         if not projetosNulos.empty:
             listaProjetosDiferentes = projetosNulos['id'].unique()
             return f'Existem Projetos na Aba KPIs que não estão no DB de Projetos, IDs: {listaProjetosDiferentes} '
-    except Exception as e:
-        return f'Erro ao buscar projetos que existem na planilha de Kpis e não existem na tabela de projetos'
+    except Exception as err:
+        return f'Erro ao buscar projetos que existem na planilha de Kpis e não existem na tabela de projetos: {err}'
 
     try:
         softDelete(engine, 'indicadores')
     except Exception as err:
-        print("ERRO DE BANCO", err)
-        return 'Erro ao efetuar exclusão lógica dos registros de Indicadores'
+        return f'Erro ao efetuar exclusão lógica dos registros de Indicadores: {err}'
 
     try:
         consolidadoDF.to_sql(name='indicadores', con=engine,
                              if_exists='append', index=False)
-    except Exception as e:
-        print(e)
-        return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
+    except Exception as err:
+        return f'Erro ao salvar dados convertidos de Projetos para o MySQL: {err}'
 
     return 'OK'
 
 
 def projetosToDB(path):
-    print("CARGA PROJETOS")
     # Importar dados da planilha na aba KPI's
     nomeAba = '03 - GP CGPE'
     try:
@@ -298,13 +289,11 @@ def projetosToDB(path):
     try:
         softDelete(engine, 'projetos')
     except Exception as err:
-        print("ERRO DE BANCO", err)
-        return 'Erro ao efetuar exclusão lógica dos registros de Projetos'
+        return f'Erro ao efetuar exclusão lógica dos registros de Projetos: {err}'
     try:
         projetosDF.to_sql(name='projetos', con=engine,
                           if_exists='append', index=False)
     except Exception as err:
-        print(err)
-        return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
+        return f'Erro ao salvar dados convertidos de Projetos para o MySQL: {err}'
 
     return 'OK'
