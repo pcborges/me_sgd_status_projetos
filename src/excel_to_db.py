@@ -41,20 +41,17 @@ def alocacoesToDB(path):
         alocacaoDF.set_index('startup')
 
     except Exception as err:
-        print(err)
-        return 'Problemas ao efetuar tratamentos da aba 02-Alocação, verifique se houveram mudanças na estrutura de colunas da planilha.'
+        return f'Verificar estrutura da Aba Alocação: {err}'
 
     try:
         softDelete(engine, 'alocacoes')
     except Exception as err:
-        print("ERRO DE BANCO", err)
-        return 'Erro ao efetuar exclusão lógica dos registros de Alocacoes'
+        return f'Erro ao efetuar exclusão lógica dos registros de Alocações: {err}'
     try:
         alocacaoDF.to_sql(name='alocacoes', con=engine,
                           if_exists='append', index=False)
     except Exception as err:
-        print(err)
-        return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
+        return f'Erro ao salvar dados convertidos de Alocações para o MySQL: {err}'
 
     return 'OK'
 
@@ -71,10 +68,14 @@ def relatoPontosAtencaoToDB(path):
     try:
         relatosDF.rename(columns={'Relato': 'relato', 'Pontos de Atenção': 'pontos_atencao',
                          'Última Atualização': 'ultima_atualizacao', 'ID': 'id'}, inplace=True)
-        relatosDF[['relato', 'pontos_atencao']].replace(
-            ['^\s', '\t', '\n', '_x([0-9a-fA-F]{4})_'], value='', regex=True, inplace=True)
+        relatosDF['relato'].replace(
+            ['^\s', '\t', '\n', '\r', '_x([0-9a-fA-F]{4})_'], value=' ', regex=True, inplace=True)
+        relatosDF['relato'] = relatosDF['relato'].str.strip()
+        relatosDF['pontos_atencao'] = relatosDF['pontos_atencao'].str.strip()
+        relatosDF['pontos_atencao'].replace(
+            ['^\s', '\t', '\n', '\r', '_x([0-9a-fA-F]{4})_'], value=' ', regex=True, inplace=True)
 
-    except Exception:
+    except Exception as err:
         return 'Problemas ao converter dados da Aba Apoio-Projetos'
     # Recuperar projetos do DB para fazer validacoes
     try:
@@ -113,6 +114,7 @@ def relatoPontosAtencaoToDB(path):
 
 
 def kpisToDB(path):
+    print("CARGA INDICADORES")
     # Importar dados da planilha na aba KPI's
     try:
         kpisDF = pd.read_excel(path,
@@ -258,6 +260,7 @@ def kpisToDB(path):
 
 
 def projetosToDB(path):
+    print("CARGA PROJETOS")
     # Importar dados da planilha na aba KPI's
     nomeAba = '03 - GP CGPE'
     try:
