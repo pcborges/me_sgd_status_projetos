@@ -63,9 +63,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `alocacoes` (
   `startup` TEXT NOT NULL,
   `nome` TEXT NOT NULL,
-  `perfil` TEXT NULL,
-  `origem` TEXT NULL,
-  `cidade` TEXT NULL,
+  `especialidade` TEXT NULL,
+  `cargo` TEXT NULL,
   `uf` TEXT(2) NULL,
   `observacao` TEXT NULL,
   `situacao` TEXT NULL,
@@ -92,3 +91,117 @@ ENGINE = InnoDB;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- VIEW `view_kpis`
+-- -----------------------------------------------------
+
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `bd_cgpe`@`%` 
+    SQL SECURITY DEFINER
+VIEW `view_kpis` AS
+    (SELECT 
+        `A`.`id` AS `dummy`,
+        `A`.`id` AS `id`,
+        `A`.`startup` AS `startup`,
+        `C`.`nome_projeto` AS `projeto`,
+        `A`.`competencia` AS `competencia`,
+        `A`.`tipo_kpi` AS `tipo_kpi`,
+        `A`.`kpi` AS `kpi1`,
+        `A`.`previsto` AS `previsto1`,
+        `A`.`realizado` AS `realizado1`,
+        `A`.`calculado` AS `calculado1`,
+        `A`.`farol` AS `farol1`,
+        `B`.`kpi` AS `kpi2`,
+        `B`.`previsto` AS `previsto2`,
+        `B`.`realizado` AS `realizado2`,
+        `B`.`calculado` AS `calculado2`,
+        `B`.`farol` AS `farol2`,
+        `C`.`status` AS `status_projeto`
+    FROM
+        ((`indicadores` `A`
+        JOIN `indicadores` `B`)
+        JOIN `projetos` `C`)
+    WHERE
+        ((`A`.`kpi` < `B`.`kpi`)
+            AND (`A`.`id` = `B`.`id`)
+            AND (`A`.`competencia` = `B`.`competencia`)
+            AND (`A`.`tipo_kpi` = `B`.`tipo_kpi`)
+            AND (`A`.`id` = `C`.`id`)
+            AND (UPPER(`C`.`status`) IN ('B - EM DESENVOLVIMENTO' , 'C - EM OPERAÇÃO'))
+            AND (`A`.`in_carga` = 9)
+            AND (`B`.`in_carga` = 9)
+            AND (`C`.`in_carga` = 9))) UNION ALL (SELECT 
+        COUNT(0) AS `dammy`,
+        `A`.`id` AS `id`,
+        `A`.`startup` AS `startup`,
+        `C`.`nome_projeto` AS `projeto`,
+        `A`.`competencia` AS `competencia`,
+        `A`.`tipo_kpi` AS `tipo_kpi`,
+        `A`.`kpi` AS `kpi1`,
+        `A`.`previsto` AS `previsto1`,
+        `A`.`realizado` AS `realizado1`,
+        `A`.`calculado` AS `calculado1`,
+        `A`.`farol` AS `farol1`,
+        `B`.`kpi` AS `kpi2`,
+        `B`.`previsto` AS `previsto2`,
+        `B`.`realizado` AS `realizado2`,
+        `B`.`calculado` AS `calculado2`,
+        `B`.`farol` AS `farol2`,
+        `C`.`status` AS `status_projeto`
+    FROM
+        ((`indicadores` `A`
+        JOIN `indicadores` `B`)
+        JOIN `projetos` `C`)
+    WHERE
+        ((`A`.`kpi` = `B`.`kpi`)
+            AND (`A`.`id` = `B`.`id`)
+            AND (`A`.`competencia` = `B`.`competencia`)
+            AND (`A`.`tipo_kpi` = `B`.`tipo_kpi`)
+            AND (`A`.`id` = `C`.`id`)
+            AND (UPPER(`A`.`kpi`) = CONVERT( UPPER('Não Informado') USING UTF8))
+            AND (UPPER(`C`.`status`) IN ('B - EM DESENVOLVIMENTO' , 'C - EM OPERAÇÃO'))
+            AND (`A`.`in_carga` = 9)
+            AND (`B`.`in_carga` = 9)
+            AND (`C`.`in_carga` = 9))
+    GROUP BY `A`.`id` , `A`.`startup` , `C`.`nome_projeto` , `A`.`competencia` , `A`.`tipo_kpi` , `A`.`kpi` , `A`.`previsto` , `A`.`realizado` , `A`.`calculado` , `A`.`farol` , `B`.`kpi` , `B`.`previsto` , `B`.`realizado` , `B`.`calculado` , `B`.`farol` , `C`.`status`
+    HAVING (COUNT(0) > 1)) UNION ALL (SELECT 
+        COUNT(0) AS `dammy`,
+        `A`.`id` AS `id`,
+        `A`.`startup` AS `startup`,
+        `C`.`nome_projeto` AS `projeto`,
+        `A`.`competencia` AS `competencia`,
+        `A`.`tipo_kpi` AS `tipo_kpi`,
+        `A`.`kpi` AS `kpi1`,
+        `A`.`previsto` AS `previsto1`,
+        `A`.`realizado` AS `realizado1`,
+        `A`.`calculado` AS `calculado1`,
+        `A`.`farol` AS `farol1`,
+        `B`.`kpi` AS `kpi2`,
+        `B`.`previsto` AS `previsto2`,
+        `B`.`realizado` AS `realizado2`,
+        `B`.`calculado` AS `calculado2`,
+        `B`.`farol` AS `farol2`,
+        `C`.`status` AS `status_projeto`
+    FROM
+        ((`indicadores` `A`
+        JOIN `indicadores` `B`)
+        JOIN `projetos` `C`)
+    WHERE
+        ((`A`.`kpi` = `B`.`kpi`)
+            AND (`A`.`id` = `B`.`id`)
+            AND (`A`.`competencia` = `B`.`competencia`)
+            AND (`A`.`tipo_kpi` = `B`.`tipo_kpi`)
+            AND (`A`.`id` = `C`.`id`)
+            AND (UPPER(`A`.`kpi`) = CONVERT( UPPER('Não Informado') USING UTF8))
+            AND (UPPER(`C`.`status`) IN ('B - EM DESENVOLVIMENTO' , 'C - EM OPERAÇÃO'))
+            AND (`A`.`in_carga` = 9)
+            AND (`B`.`in_carga` = 9)
+            AND (`C`.`in_carga` = 9))
+    GROUP BY `A`.`id` , `A`.`startup` , `C`.`nome_projeto` , `A`.`competencia` , `A`.`tipo_kpi` , `A`.`kpi` , `A`.`previsto` , `A`.`realizado` , `A`.`calculado` , `A`.`farol` , `B`.`kpi` , `B`.`previsto` , `B`.`realizado` , `B`.`calculado` , `B`.`farol` , `C`.`status`
+    HAVING ((COUNT(0) = 1)
+        AND (CONCAT(CAST(`A`.`previsto` AS CHAR CHARSET UTF8MB4),
+            CAST(`A`.`realizado` AS CHAR CHARSET UTF8MB4)) < CONCAT(CAST(`B`.`previsto` AS CHAR CHARSET UTF8MB4),
+            CAST(`B`.`realizado` AS CHAR CHARSET UTF8MB4))))) ORDER BY `startup` , `competencia` , `tipo_kpi` , `kpi1`;
+

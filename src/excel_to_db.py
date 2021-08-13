@@ -1,5 +1,4 @@
 import pandas as pd
-import time
 from datetime import datetime
 from sqlalchemy import create_engine
 from config import getDBConnectionString
@@ -17,31 +16,26 @@ def alocacoesToDB(path):
         return 'Aba 02-Alocação não encontrada, verifique se não houveram mudanças na estrutura da planilha'
 
     try:
-        alocacaoDF = alocacaoDF.iloc[0:, 0:10]
+        alocacaoDF = alocacaoDF.iloc[0:, 0:8]
         alocacaoDF.fillna('N/D', inplace=True)
         colunas = {
-            "PROJETO": "startup",
+            "STARTUP": "startup",
             "ORGÃO": "sigla_orgao",
-            "PERFIL": "perfil",
-            "ORIGEM": "origem",
+            "ESPECIALIDADE": "especialidade",
+            'CARGO': 'cargo',
             "NOME": "nome",
             "OBS": "observacao",
-            "Situação": "situacao",
-            "CIDADE": "cidade",
+            "ALOCAÇÃO": "situacao",
             "UF": "uf",
         }
 
         alocacaoDF.rename(columns=colunas, inplace=True)
         # Remover espaços de strings
         alocacaoDF['startup'] = alocacaoDF['startup'].str.strip()
-        alocacaoDF['perfil'] = alocacaoDF['perfil'].str.strip()
-        alocacaoDF['cidade'] = alocacaoDF['cidade'].str.strip()
+        alocacaoDF['especialidade'] = alocacaoDF['especialidade'].str.strip()
         alocacaoDF['uf'] = alocacaoDF['uf'].str.strip()
         #
         # Status 9 indica a visão mais atualizada da informação
-        alocacaoDF = alocacaoDF.assign(in_carga=9)
-        alocacaoDF = alocacaoDF.assign(dt_carga=datetime.now())
-        alocacaoDF.drop(['SIAPE'], axis='columns', inplace=True)
         alocacaoDF = alocacaoDF.assign(in_carga=9)
         alocacaoDF = alocacaoDF.assign(dt_carga=datetime.now())
         alocacaoDF.set_index('startup')
@@ -67,8 +61,6 @@ def alocacoesToDB(path):
 
 def relatoPontosAtencaoToDB(path):
     # Importar dados da planilha na aba KPI's
-    print('CARGA_STARTUPS_INICIO')
-    start_time = time.time()
     try:
         relatosDF = pd.read_excel(path,
                                   sheet_name='Apoio-Projetos', usecols=['Relato', 'Pontos de Atenção',
@@ -117,14 +109,10 @@ def relatoPontosAtencaoToDB(path):
         print(err)
         return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
 
-    print('Tempo de execução: %s segundos' % (time.time() - start_time))
-    print('CARGA_STARTUPS_FIM')
     return 'OK'
 
 
 def kpisToDB(path):
-    print('CARGA_KPIS_INICIO')
-    start_time = time.time()
     # Importar dados da planilha na aba KPI's
     try:
         kpisDF = pd.read_excel(path,
@@ -266,15 +254,11 @@ def kpisToDB(path):
         print(e)
         return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
 
-    print('Tempo de execução: %s segundos' % (time.time() - start_time))
-    print('CARGA_KPIS_FIM')
     return 'OK'
 
 
 def projetosToDB(path):
     # Importar dados da planilha na aba KPI's
-    print('CARGA_PROJETOS_INICIO')
-    start_time = time.time()
     nomeAba = '03 - GP CGPE'
     try:
         projetosDF = pd.read_excel(
@@ -300,7 +284,8 @@ def projetosToDB(path):
         projetosDF = projetosDF.assign(in_carga=9)
         projetosDF = projetosDF.assign(dt_carga=datetime.now())
         projetosDF.set_index('id')
-    except Exception:
+    except Exception as err:
+        print(err)
         return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
 
     # Verificar duplicidade de projetos
@@ -319,6 +304,4 @@ def projetosToDB(path):
         print(err)
         return 'Erro ao salvar dados convertidos de Projetos para o MySQL'
 
-    print('Tempo de execução: %s segundos' % (time.time() - start_time))
-    print('CARGA_PROJETOS_FIM')
     return 'OK'
