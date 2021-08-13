@@ -1,6 +1,6 @@
 DEBUG=True
 FLASK_ENV=development
-SENHA_UPLOAD=!sgdCarga2021
+SENHA_UPLOAD=senha
 DB_USER=bduser
 DB_HOST=localhost
 DB_PASS=password
