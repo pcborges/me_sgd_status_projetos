@@ -1,0 +1,7 @@
+DEBUG=True
+FLASK_ENV=development
+SENHA_UPLOAD=senha
+DB_USER=bduser
+DB_HOST=localhost
+DB_PASS=password
+DB_SCHEMA=bdschema
