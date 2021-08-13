@@ -256,7 +256,7 @@ def projetosToDB(path):
     nomeAba = '03 - GP CGPE'
     try:
         projetosDF = pd.read_excel(
-            path, sheet_name=nomeAba, header=2)
+            path, sheet_name=nomeAba)
     except Exception:
         return f'Aba {nomeAba} não encontrada, verifique se o arquivo enviado está no padrão esperado.'
     filtroColunas = ['ID', 'ÓRGÃO', 'Projeto', 'Resumo', 'Startup', 'Líder do Projeto', 'Email',
@@ -274,6 +274,7 @@ def projetosToDB(path):
         projetosDF.fillna('N/D', inplace=True)
         projetosDF['nome_projeto'] = projetosDF['nome_projeto'].str.strip()
         projetosDF['resumo'] = projetosDF['resumo'].str.strip()
+        projetosDF['email_lider'] = projetosDF['email_lider'].str.lower()
         # Status 9 indica a visão mais atualizada da informação
         projetosDF = projetosDF.assign(in_carga=9)
         projetosDF = projetosDF.assign(dt_carga=datetime.now())
