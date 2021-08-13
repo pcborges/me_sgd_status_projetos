@@ -1,19 +1,12 @@
 import pandas as pd
 import time
-from google.oauth2 import service_account
 from datetime import datetime
-import pandas_gbq as gbq
 from sqlalchemy import create_engine
 from config import getDBConnectionString
 from .db_utils import softDelete
 from .utils import separarKPIs
 
 engine = create_engine(getDBConnectionString())
-
-credentials = service_account.Credentials.from_service_account_file(
-    'google-credentials.json')
-
-gbq.context.credentials = credentials
 
 
 def alocacoesToDB(path):
@@ -57,11 +50,6 @@ def alocacoesToDB(path):
         print(err)
         return 'Problemas ao efetuar tratamentos da aba 02-Alocação, verifique se houveram mudanças na estrutura de colunas da planilha.'
 
-    # try:
-    #     alocacaoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.alocacao',
-    #                       if_exists='replace', project_id='sgdgovbr')
-    # except Exception:
-    #     return 'Erro ao salvar dados convertidos de Alocacao para o BigQuery'
     try:
         softDelete(engine, 'alocacoes')
     except Exception as err:
@@ -96,11 +84,8 @@ def relatoPontosAtencaoToDB(path):
 
     except Exception:
         return 'Problemas ao converter dados da Aba Apoio-Projetos'
-    # tratar informações da aba de metadados
+    # Recuperar projetos do DB para fazer validacoes
     try:
-        # query = 'SELECT nome_projeto, Startup as nome_resumido FROM `sgdgovbr.projetos_sgd.projetos`'
-        # projetosGBQDF = gbq.read_gbq(
-        #     query, project_id='sgdgovbr', progress_bar_type=None)
         query = 'SELECT id, startup FROM `projetos` where in_carga = 9'
         projetosDF = pd.read_sql(
             query, con=engine)
@@ -124,12 +109,6 @@ def relatoPontosAtencaoToDB(path):
     except Exception as err:
         print("ERRO DE BANCO", err)
         return 'Erro ao efetuar exclusão lógica dos registros de Relatos'
-    # # Enviar dados tratados para o GBQ
-    # try:
-    #     startupsConsolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.startups',
-    #                                  if_exists='replace', project_id='sgdgovbr')
-    # except Exception:
-    #     return 'Erro ao salvar dados convertidos da aba Apoio-Projetos no banco de dados.'
 
     try:
         projetosRelatosDF.to_sql(name='relatos', con=engine,
@@ -150,8 +129,6 @@ def kpisToDB(path):
     try:
         kpisDF = pd.read_excel(path,
                                sheet_name='06-Apoio-KPIs consolidados', header=1)
-        # metadadosDF = pd.read_excel(
-        #     path, sheet_name='Apoio-Metadados', header=1)
     except Exception:
         return 'Aba 06-Apoio-KPIs não encontrada na planilha'
 
@@ -275,12 +252,7 @@ def kpisToDB(path):
             return f'Existem Projetos na Aba KPIs que não estão no DB de Projetos, IDs: {listaProjetosDiferentes} '
     except Exception as e:
         return f'Erro ao buscar projetos que existem na planilha de Kpis e não existem na tabela de projetos'
-    # Enviar dados tratados para o GBQ
-    # try:
-    #     consolidadoDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.kpisPorPeriodo',
-    #                          if_exists='replace', project_id='sgdgovbr')
-    # except Exception:
-    #     return 'Erro ao salvar dados convertidos da aba de KPIs para o BigQuery'
+
     try:
         softDelete(engine, 'indicadores')
     except Exception as err:
@@ -335,13 +307,6 @@ def projetosToDB(path):
     if len(projetosDF['nome_projeto'].unique()) < len(projetosDF.index):
         return f'Aba {nomeAba} tem projetos com mesmo nome, favor verificar.'
 
-    # Enviar dados tratados para o GBQ
-    # try:
-    #     projetosDF.to_gbq(credentials=credentials, destination_table='projetos_sgd.projetos',
-    #                       if_exists='replace', project_id='sgdgovbr')
-    # except Exception as e:
-    #     print(e)
-    #     return 'Erro ao salvar dados convertidos de Projetos para o BigQuery'
     try:
         softDelete(engine, 'projetos')
     except Exception as err:
