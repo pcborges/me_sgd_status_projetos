@@ -60,7 +60,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `Alocacoes`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `Alocacoes` (
+CREATE TABLE IF NOT EXISTS `alocacoes` (
   `startup` TEXT NOT NULL,
   `nome` TEXT NOT NULL,
   `perfil` TEXT NULL,

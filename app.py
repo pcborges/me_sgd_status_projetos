@@ -30,6 +30,7 @@ def upload():
 
 @app.route('/dashboard')
 def dashboard():
+
     return render_template('dashboard_ds.html')
 
 
