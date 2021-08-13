@@ -1,6 +1,5 @@
 import os
 from flask import Flask,  request,  render_template, flash
-from src.tratar_dados import getProjetosEmExecucaoHTML, getProjetosPriorizadosJSON, getProjetosEmDiagnosticoHTML, getTotaisProjetosPriorizados
 from src.excel_to_db import kpisToDB, relatoPontosAtencaoToDB, projetosToDB, alocacoesToDB
 from src.utils import validateFileReq
 from config import getUploadPass
