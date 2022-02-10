@@ -5,7 +5,7 @@ from config import getDBConnectionString
 from .db_utils import softDelete
 from .utils import separarKPIs, normalizeDates
 
-engine = create_engine(getDBConnectionString())
+engine = create_engine(getDBConnectionString(), pool_pre_ping=True)
 
 
 def alocacoesToDB(path):

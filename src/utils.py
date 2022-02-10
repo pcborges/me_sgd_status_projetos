@@ -47,9 +47,9 @@ def separarKPIs(dataframe):
             try:
                 if linha[realizado] == 0 or linha[realizado] == None:
                     farol = 4  # CINZA
-                elif ((linha[realizado] * 100) / linha[previsto]) >= 80:
+                elif ((linha[realizado] * 100) / linha[previsto]) >= 100:
                     farol = 3  # VERDE
-                elif (((linha[realizado] * 100) / linha[previsto]) >= 60) & (((linha[realizado] * 100) / linha[previsto]) < 80):
+                elif (((linha[realizado] * 100) / linha[previsto]) >= 90) & (((linha[realizado] * 100) / linha[previsto]) < 100):
                     farol = 2  # AMARELO
                 else:
                     farol = 1  # VERMELHO
