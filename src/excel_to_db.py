@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from config import getDBConnectionString
 from .db_utils import softDelete
-from .utils import separarKPIs
+from .utils import separarKPIs, normalizeDates
 
 engine = create_engine(getDBConnectionString())
 
@@ -260,12 +260,14 @@ def projetosToDB(path):
     except Exception:
         return f'Aba {nomeAba} não encontrada, verifique se o arquivo enviado está no padrão esperado.'
     filtroColunas = ['ID', 'ÓRGÃO', 'Projeto', 'Resumo', 'Startup', 'Líder do Projeto', 'Email',
-                     'Telefone', 'Titular CGPE', 'Substituto CGPE ', 'Status', 'SITUAÇÃO', 'Observação']
+                     'Telefone', 'Titular CGPE', 'Substituto CGPE ', 'Status', 'SITUAÇÃO', 'Observação', 'DT APROVAÇÃO REUNIÃO EXECUTIVA',
+                     "DT ENTRADA OPERAÇÃO ACT", "DT ENTRADA OPERAÇÃO REAL"]
 
     newColumnsNames = {
         "ÓRGÃO": "sigla_orgao", "Projeto": "nome_projeto", "Resumo": "resumo", "Líder do Projeto": "lider_squad", "Email": "email_lider",
         "Telefone": "telefone_lider", "Titular CGPE": "titular_cgpe", "Substituto CGPE ": "substituto_cgpe", "Status": "status",
-        "SITUAÇÃO": "situacao", "Observação": "observacao", 'Startup': 'startup', 'ID': 'id'
+        "SITUAÇÃO": "situacao", "Observação": "observacao", 'Startup': 'startup', 'ID': 'id', "DT APROVAÇÃO REUNIÃO EXECUTIVA": "dt_aprov_reuniao_executiva",
+        "DT ENTRADA OPERAÇÃO ACT": "dt_operacao_act", "DT ENTRADA OPERAÇÃO REAL": "dt_operacao_real"
     }
     # Enviar dados tratados para o GBQ
     try:
@@ -282,6 +284,18 @@ def projetosToDB(path):
     except Exception as err:
         print(err)
         return 'Problemas ao converter nome de colunas, verifique se a planilha não foi modificada.'
+
+    # Tratar os campos que contém data preenchida e garantir que são datas válidas, senão será incluído como null no banco.
+    try:
+        projetosDF['dt_aprov_reuniao_executiva'] = projetosDF['dt_aprov_reuniao_executiva'].apply(
+            normalizeDates)
+        projetosDF['dt_operacao_act'] = projetosDF['dt_operacao_act'].apply(
+            normalizeDates)
+        projetosDF['dt_operacao_real'] = projetosDF['dt_operacao_real'].apply(
+            normalizeDates)
+    except Exception as err:
+        print(repr(err))
+        return 'Problemas com os dados das colunas de Data (dt_aprov_reuniao_executiva, dt_operacao_act, dt_operacao_real), verifique se na planilha não existe um valor fora do padrão. '
 
     # Verificar duplicidade de projetos
     if len(projetosDF['nome_projeto'].unique()) < len(projetosDF.index):

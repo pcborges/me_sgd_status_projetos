@@ -1,4 +1,5 @@
 import os
+import re
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
@@ -77,3 +78,15 @@ def separarKPIs(dataframe):
             indice_periodo += 1
 
     return data
+
+
+def normalizeDates(entry):
+    try:
+        # encontrar padrão de data na string
+        match_str = re.search(
+            r'\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])', str(entry))
+        date_formatted = datetime.strptime(
+            match_str.group(), '%Y-%m-%d').date()
+        return date_formatted
+    except Exception as e:
+        return pd.NaT
