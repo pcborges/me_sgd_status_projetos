@@ -2,6 +2,7 @@ import os
 import re
 from werkzeug.utils import secure_filename
 from datetime import datetime
+import pandas as pd
 
 UPLOAD_FOLDER = os.getcwd() + 'upload'
 ALLOWED_EXTENSIONS = {'xlsm', 'xlsx'}
