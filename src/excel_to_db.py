@@ -139,6 +139,7 @@ def kpisToDB(path):
             'Tipo': 'tipo_kpi',
             'Data base': 'data_base',
             'Data alvo': 'data_alvo',
+            'Quanto menor melhor': 'indicador_invertido',
             kpisLimpoDF.columns[6]: 'prev_jan_2021',
             kpisLimpoDF.columns[7]: 'prev_fev_2021',
             kpisLimpoDF.columns[8]: 'prev_mar_2021',
@@ -203,6 +204,7 @@ def kpisToDB(path):
         # remover espaços do inicio da descrição dos KPI's
         kpisConsolidados['kpi'].replace(
             ['^\s', '\n'], value='', regex=True, inplace=True)
+
     except Exception as err:
         return f'Erro ao consolidar indicadores, verificar se não foi alterada a estrutura da tabela: {err}'
 

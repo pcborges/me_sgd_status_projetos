@@ -40,25 +40,38 @@ def separarKPIs(dataframe):
     data = []
     for linha in dataframe.itertuples():
         indice_periodo = 0
+        inverter_calculo = True if linha.indicador_invertido == "SIM" else False
         for i in range(7, 31):
             previsto = i
             realizado = i + 24
             farol = 0
-
             try:
-                if linha[realizado] == 0 or linha[realizado] == None:
-                    farol = 4  # CINZA
-                elif ((linha[realizado] * 100) / linha[previsto]) >= 100:
-                    farol = 3  # VERDE
-                elif (((linha[realizado] * 100) / linha[previsto]) >= 90) & (((linha[realizado] * 100) / linha[previsto]) < 100):
-                    farol = 2  # AMARELO
+                if inverter_calculo:
+                    if linha[realizado] == 0 or linha[realizado] == None:
+                        farol = 4  # CINZA
+                    elif ((linha[previsto] * 100) / linha[realizado]) >= 100:
+                        farol = 3  # VERDE
+                    elif (((linha[previsto] * 100) / linha[realizado]) >= 90) & (((linha[previsto] * 100) / linha[realizado]) < 100):
+                        farol = 2  # AMARELO
+                    else:
+                        farol = 1  # VERMELHO
                 else:
-                    farol = 1  # VERMELHO
+                    if linha[realizado] == 0 or linha[realizado] == None:
+                        farol = 4  # CINZA
+                    elif ((linha[realizado] * 100) / linha[previsto]) >= 100:
+                        farol = 3  # VERDE
+                    elif (((linha[realizado] * 100) / linha[previsto]) >= 90) & (((linha[realizado] * 100) / linha[previsto]) < 100):
+                        farol = 2  # AMARELO
+                    else:
+                        farol = 1  # VERMELHO
             except ZeroDivisionError:
                 farol = 4  # CINZA
 
             try:
-                calculado = linha[realizado] / linha[previsto]
+                if inverter_calculo:
+                    calculado = linha[previsto] / linha[realizado]
+                else:
+                    calculado = linha[realizado] / linha[previsto]
             except ZeroDivisionError:
                 calculado = 0
 
@@ -77,7 +90,6 @@ def separarKPIs(dataframe):
                 'farol': farol
             })
             indice_periodo += 1
-
     return data
 
 
